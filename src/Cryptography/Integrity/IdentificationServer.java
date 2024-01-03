@@ -7,7 +7,6 @@ import it.unisa.dia.gas.plaf.jpbc.pairing.PairingFactory;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.Random;
 
 public class IdentificationServer {
     private static Pairing pairing = PairingFactory.getPairing("src/params/curves/a.properties");
@@ -25,8 +24,8 @@ public class IdentificationServer {
     }
 
     public Element generatePublicKey() {
-        Element PKs = P.duplicate().mulZn(ts).getImmutable();
-        return PKs;
+        Element PK = P.duplicate().mulZn(ts).getImmutable();
+        return PK;
     }
     private Element hashFunctionH1(String identity) {
         try {
