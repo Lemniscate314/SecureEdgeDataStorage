@@ -8,5 +8,6 @@
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="jpbc-2.0" level="project" />
+    <orderEntry type="library" name="bcprov-jdk16-1.46" level="project" />
   </component>
 </module>
