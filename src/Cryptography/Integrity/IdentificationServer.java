@@ -27,6 +27,23 @@ public class IdentificationServer {
         Element PK = P.duplicate().mulZn(ts).getImmutable();
         return PK;
     }
+
+    public Element performIdentification(String ownerIdentity, Element publicKeyPKv) {
+        Element IDw = hashFunctionH1(ownerIdentity);
+
+        Element Ss_w = ts.duplicate().mul(IDw).getImmutable();
+
+        Element secretKeySw = Ss_w.duplicate().getImmutable();
+        Element publicKeyPKs = generatePublicKey();
+
+
+        if (publicKeyPKv != null) {
+            secretKeySw.add(Ss_w);
+            publicKeyPKs.add(publicKeyPKv);
+        }
+
+        return Ss_w;
+    }
     private Element hashFunctionH1(String identity) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
