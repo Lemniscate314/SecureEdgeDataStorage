@@ -1,4 +1,5 @@
 package Cryptography.Integrity;
+import Cryptography.IBS.IBSscheme;
 
 import it.unisa.dia.gas.jpbc.Element;
 import it.unisa.dia.gas.jpbc.Field;
@@ -9,63 +10,10 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
 public class IdentificationServer {
-    private static Pairing pairing = PairingFactory.getPairing("src/params/curves/a.properties");
-    private static Field G0 = pairing.getG1();
-    private static Field G1 = pairing.getG2();
-    private static Field Zp = pairing.getZr();
-
-    private Element P;
-    private Element ts;
+    private IBSscheme IBSscheme;
 
     public IdentificationServer() {
-        P = G0.newRandomElement().getImmutable();
-
-        ts = Zp.newRandomElement().getImmutable();
-    }
-
-    public Element generatePublicKey() {
-        Element PK = P.duplicate().mulZn(ts).getImmutable();
-        return PK;
-    }
-
-    public Element performIdentification(String ownerIdentity, Element publicKeyPKv) {
-        Element IDw = hashFunctionH1(ownerIdentity);
-
-        Element Ss_w = ts.duplicate().mul(IDw).getImmutable();
-
-        Element secretKeySw = Ss_w.duplicate().getImmutable();
-        Element publicKeyPKs = generatePublicKey();
-
-
-        if (publicKeyPKv != null) {
-            secretKeySw.add(Ss_w);
-            publicKeyPKs.add(publicKeyPKv);
-        }
-
-        return Ss_w;
-    }
-    private Element hashFunctionH1(String identity) {
-        try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] hash = digest.digest(identity.getBytes());
-
-            return G0.newElementFromHash(hash, 0, hash.length).getImmutable();
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    private Element hashFunctionH2(String input) {
-        try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] hash = digest.digest(input.getBytes());
-
-            return Zp.newElementFromBytes(hash).getImmutable();
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-            return null;
-        }
+        this.IBSscheme = new IBSscheme();
     }
 
     private byte[] hashFunctionH3(String input) {
@@ -78,9 +26,19 @@ public class IdentificationServer {
         }
     }
 
+    public Element[] sendPublicParameters_Sw(String ID){
+        Element[] PublicParameters_Sw = new Element[6];
+        PublicParameters_Sw[0] = this.IBSscheme.getP();
+        PublicParameters_Sw[1] = this.IBSscheme.getPK();
+        PublicParameters_Sw[5] = this.IBSscheme.generate_private_key_ID(ID);
+        //je suppose que la classe s'appelle SISscheme
+        //PP[2] = this.SISscheme.getN();
+        //PP[3] = this.SISscheme.getM();
+        //PP[4] = this.SISscheme.getQ();
+        return PublicParameters_Sw;
+    }
+
     public static void main(String[] args) {
         IdentificationServer server = new IdentificationServer();
-        Element publicKey = server.generatePublicKey();
-        System.out.println("Public Key: " + publicKey);
     }
 }

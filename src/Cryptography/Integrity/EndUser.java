@@ -1,28 +1,22 @@
 package Cryptography.Integrity;
+import Cryptography.IBS.EndUserIBSsignature;
 
 import it.unisa.dia.gas.jpbc.Element;
 
 
 
 public class EndUser {
-    private Element Sw;
-    private Element PK;
+    protected EndUserIBSsignature EndUserIBSsignature;
+    //je suppose que la classe s'appelle EndUserSISsignature
+    //protected EndUserIBSsignature EndUserSISsignature;
 
-    public EndUser() {
-        Sw = null;
-        PK = null;
-    }
-
-    public void receiveSecretShare(Element Ss_w) {
-
-        if (Sw == null) {
-            Sw = Ss_w.duplicate().getImmutable();
-        } else {
-            Sw.add(Ss_w);
+    public void getPublicParameters_Sw(Element[] PublicParameters_Sw){
+        if (PublicParameters_Sw.length==6){
+            this.EndUserIBSsignature.new_Sw_PK_P(PublicParameters_Sw[5], PublicParameters_Sw[0], PublicParameters_Sw[1]);
+            //this.EndUserSISsignature.setN(PublicParameters_Sw[2]);
+            //this.EndUserSISsignature.setM(PublicParameters_Sw[3]);
+            //this.EndUserSISsignature.setQ(PublicParameters_Sw[4]);
         }
-    }
-
-    public void calculatePublicKey(Element PKs) {
-        PK = PKs.duplicate().getImmutable();
+        else{System.out.println("Erreur du nombres de parametres publics");}
     }
 }
