@@ -10,12 +10,12 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
+import java.math.BigInteger;
+import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Properties;
+
 public class IBSscheme {
     static protected Pairing pairing = PairingFactory.getPairing("src/params/curves/a.properties");
     static protected Field Zp = pairing.getZr();
@@ -27,13 +27,28 @@ public class IBSscheme {
     protected HashMap<String, Element>  Key_couples= new HashMap();
     protected ArrayList<String> IDs= new ArrayList();
     protected static String configFilePath = "src/Cryptography/IBS/ServerParameters.properties";
+    static SecureRandom random = new SecureRandom();
+    public static final BigInteger a = new BigInteger(128,random); // The multiplier
+    static final BigInteger I0 = new BigInteger(128, random);  // Initial value of I
+    static final BigInteger C0 = new BigInteger(128, random);  // Initial value of C
+    private BigInteger In; // Current value of I
+    private BigInteger Cn; // Current value of C
+    public static int l = 2; // Primary security parameter
+    public static BigInteger q = BigInteger.valueOf(l).pow(2).nextProbablePrime(); // The modulus q = next probable prime number of l^2
+    public static int m = (int)(l * Math.log(q.doubleValue()) / Math.log(2)) + 1; // Ensuring m > l.log(q)
 
+
+    // Constructor
     public IBSscheme(){
         generate_MSK_P();
         this.PK = (this.P).duplicate().mulZn(this.MSK);
         //On reconstruit les clés privés et utilisateurs
         Key_couples.clear();
         build_HashMap();
+
+        //SIS parameters initialization
+        this.In = I0; // Initialize In with I0
+        this.Cn = C0; // Initialize Cn with C0
     }
 
     public static Pairing getPairing() {
@@ -62,6 +77,43 @@ public class IBSscheme {
     }
     public ArrayList<String> getIDs() {
         return IDs;
+    }
+    public BigInteger getIn() {
+        return In;
+    }
+    public void setIn(BigInteger in) {
+        In = in;
+    }
+
+    public BigInteger getQ() {
+        return q;
+    }
+
+    public int getL() {
+        return l;
+    }
+
+    public int getM() {
+        return m;
+    }
+
+    // Implement I, a uniform random number generator
+    public BigInteger generateRandomNumber() {
+        BigInteger product = a.multiply(In).add(Cn);
+        BigInteger nextIn = product.mod(q); // Calculate In+1
+        Cn = product.divide(q); // Calculate Cn+1
+        In = nextIn; // Update In for the next iteration
+        return nextIn;
+    }
+
+    public BigInteger[][] generateMatrixA() {
+        BigInteger[][] matrixA = new BigInteger[l][m];
+        for (int i = 0; i < l; i++) {
+            for (int j = 0; j < m; j++) {
+                matrixA[i][j] = generateRandomNumber(); // Using the generateRandomNumber method to generate each entry
+            }
+        }
+        return matrixA;
     }
 
     protected void new_IBSscheme(){
