@@ -83,7 +83,8 @@ public class EndUserIBSsignature {
     }
 
 
-    //Fonction qui genere la clé privé maitre et gere la lecture dans un fichier
+    //Fonction qui load les paramètres depuis le fichier configFilePath
+    //Si le fichier est vide alors elle print qu'il faut requeter le serveur
     protected void load_Sw_PK_P(){
         //Fichier de configuration pour stocker la clé secrète
         Properties prop = new Properties();
@@ -107,7 +108,7 @@ public class EndUserIBSsignature {
         }
     }
 
-    //Fonction qui genere une nouvelle clé privé maitre et gère l'écriture dans un fichier
+    //Fonction qui récupère les paramètres publics utiles à IBS et gère l'écriture dans un fichier
     public void new_Sw_PK_P(Element newSw, Element newPK, Element newP){
         Properties prop = new Properties();
         this.Sw = newSw;
