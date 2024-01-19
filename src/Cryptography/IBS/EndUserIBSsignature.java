@@ -13,6 +13,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
 import java.security.SecureRandom;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -30,6 +31,9 @@ public class EndUserIBSsignature {
     protected Element PK;
     protected String ID;
     protected Element Sw;
+    private int l;     // l is the number of rows in matrix A
+    private int m;     // m is the number of columns in matrix A
+    private BigInteger q;     // The modulus, a polynomial of l
     static SecureRandom random = new SecureRandom();
     public static final BigInteger a = new BigInteger(128, random); // The multiplier
     static final BigInteger I0 = new BigInteger(128, random); // Initial value of I
@@ -123,11 +127,17 @@ public class EndUserIBSsignature {
         String chaine1 = prop.getProperty("Sw");
         String chaine2 = prop.getProperty("PK");
         String chaine3 = prop.getProperty("P");
+        String chaine4 = prop.getProperty("l");
+        String chaine5 = prop.getProperty("m");
+        String chaine6 = prop.getProperty("q");
         if (chaine1.length() != 0 && chaine2.length() != 0) {// La clé existe et est stocké dans le fichier
             try {
                 this.Sw = G0.newElementFromBytes(Base64.decode(chaine1));
                 this.PK = G0.newElementFromBytes(Base64.decode(chaine2));
                 this.P = G0.newElementFromBytes(Base64.decode(chaine3));
+                this.l = ByteBuffer.wrap(Base64.decode(chaine4)).getInt();
+                this.m = ByteBuffer.wrap(Base64.decode(chaine5)).getInt();
+                this.q = new BigInteger(Base64.decode(chaine6));
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -137,14 +147,13 @@ public class EndUserIBSsignature {
         }
     }
 
-    // Fonction qui récupère les paramètres publics utiles à IBS et gère l'écriture
-    // dans un fichier
-    public void new_Sw_PK_P(Element newSw, Element newPK, Element newP, Element newN, Element newM, Element newQ) {
+    // Fonction qui récupère les paramètres publics utiles à IBS et gère l'écriture dans un fichier
+    public void new_Sw_PK_P(Element newSw, Element newPK, Element newP, int newL, int newM, BigInteger newQ) {
         Properties prop = new Properties();
         this.Sw = newSw;
         this.PK = newSw;
         this.P = newP;
-        this.n = newN;
+        this.l = newL;
         this.m = newM;
         this.q = newQ;
         try {
@@ -152,9 +161,9 @@ public class EndUserIBSsignature {
             prop.setProperty("Sw", Base64.encodeBytes(this.Sw.toBytes()));
             prop.setProperty("PK", Base64.encodeBytes(this.PK.toBytes()));
             prop.setProperty("P", Base64.encodeBytes(this.P.toBytes()));
-            prop.setProperty("n", Base64.encodeBytes(this.n.toBytes()));
-            prop.setProperty("m", Base64.encodeBytes(this.m.toBytes()));
-            prop.setProperty("q", Base64.encodeBytes(this.q.toBytes()));
+            prop.setProperty("l", Base64.encodeBytes(ByteBuffer.allocate(Integer.BYTES).putInt(this.l).array()));
+            prop.setProperty("m", Base64.encodeBytes(ByteBuffer.allocate(Integer.BYTES).putInt(this.m).array()));
+            prop.setProperty("q", Base64.encodeBytes(this.q.toByteArray()));
             prop.store(new FileOutputStream(configFilePath), null);
         } catch (IOException e) {
             e.printStackTrace();
