@@ -10,6 +10,8 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigInteger;
+import java.security.SecureRandom;
 import java.util.Properties;
 public class EndUserIBSsignature {
     static protected Pairing pairing = PairingFactory.getPairing("src/params/curves/a.properties");
@@ -20,12 +22,24 @@ public class EndUserIBSsignature {
     protected Element PK;
     protected String ID;
     protected Element Sw;
+    static SecureRandom random = new SecureRandom();
+    public static final BigInteger a = new BigInteger(128,random); // The multiplier
+    static final BigInteger I0 = new BigInteger(128, random);  // Initial value of I
+    static final BigInteger C0 = new BigInteger(128, random);  // Initial value of C
     protected static String configFilePath = "src/Cryptography/IBS/UserParameters.properties";
 
     public EndUserIBSsignature(){
         load_Sw_PK_P();
     }
-
+    public static BigInteger getA() {
+        return a;
+    }
+    public static BigInteger getI0() {
+        return I0;
+    }
+    public static BigInteger getC0() {
+        return C0;
+    }
     public static Pairing getPairing() {
         return pairing;
     }

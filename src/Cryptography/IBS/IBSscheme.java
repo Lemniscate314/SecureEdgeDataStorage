@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.Properties;
 
 public class IBSscheme {
+    EndUserIBSsignature endUserIBSsignature = new EndUserIBSsignature();
     static protected Pairing pairing = PairingFactory.getPairing("src/params/curves/a.properties");
     static protected Field Zp = pairing.getZr();
     static protected Field G0 = pairing.getG1();
@@ -28,14 +29,15 @@ public class IBSscheme {
     protected ArrayList<String> IDs= new ArrayList();
     protected static String configFilePath = "src/Cryptography/IBS/ServerParameters.properties";
     static SecureRandom random = new SecureRandom();
-    public static final BigInteger a = new BigInteger(128,random); // The multiplier
-    static final BigInteger I0 = new BigInteger(128, random);  // Initial value of I
-    static final BigInteger C0 = new BigInteger(128, random);  // Initial value of C
+    public BigInteger a = endUserIBSsignature.getA(); // The multiplier
+    public BigInteger I0 = endUserIBSsignature.getI0();  // Initial value of I
+    public BigInteger C0 = endUserIBSsignature.getC0();  // Initial value of C
     private BigInteger In; // Current value of I
     private BigInteger Cn; // Current value of C
     public static int l = 2; // Primary security parameter
     public static BigInteger q = BigInteger.valueOf(l).pow(2).nextProbablePrime(); // The modulus q = next probable prime number of l^2
     public static int m = (int)(l * Math.log(q.doubleValue()) / Math.log(2)) + 1; // Ensuring m > l.log(q)
+    public BigInteger[][] generatedMatrixA = calculateMatrixA(l, m);
 
 
     // Constructor
@@ -99,6 +101,8 @@ public class IBSscheme {
 
     // Implement I, a uniform random number generator
     public BigInteger generateRandomNumber() {
+        In = I0;
+        Cn = C0;
         BigInteger product = a.multiply(In).add(Cn);
         BigInteger nextIn = product.mod(q); // Calculate In+1
         Cn = product.divide(q); // Calculate Cn+1
@@ -106,10 +110,10 @@ public class IBSscheme {
         return nextIn;
     }
 
-    public BigInteger[][] generateMatrixA() {
-        BigInteger[][] matrixA = new BigInteger[l][m];
-        for (int i = 0; i < l; i++) {
-            for (int j = 0; j < m; j++) {
+    public BigInteger[][] calculateMatrixA(int nbRow, int nbColumn) {
+        BigInteger[][] matrixA = new BigInteger[nbRow][nbColumn];
+        for (int i = 0; i < nbRow; i++) {
+            for (int j = 0; j < nbColumn; j++) {
                 matrixA[i][j] = generateRandomNumber(); // Using the generateRandomNumber method to generate each entry
             }
         }

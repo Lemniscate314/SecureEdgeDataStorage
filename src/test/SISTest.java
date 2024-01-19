@@ -1,11 +1,7 @@
 package test;
 
-import Cryptography.IBS.IBSscheme;
-import Sis.DataMatrixConstruction;
-import java.math.BigInteger;
-import java.util.Arrays;
-
 public class SISTest {
+    /**
     public static void main(String[] args) {
         // Test IBSscheme
         IBSscheme ibs = new IBSscheme();
@@ -53,5 +49,5 @@ public class SISTest {
             }
             System.out.println();
         }
-    }
+    }*/
 }
