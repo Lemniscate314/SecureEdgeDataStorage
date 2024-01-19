@@ -37,7 +37,7 @@ public class IBSscheme {
     public static int l = 2; // Primary security parameter
     public static BigInteger q = BigInteger.valueOf(l).pow(2).nextProbablePrime(); // The modulus q = next probable prime number of l^2
     public static int m = (int)(l * Math.log(q.doubleValue()) / Math.log(2)) + 1; // Ensuring m > l.log(q)
-    public BigInteger[][] generatedMatrixA = calculateMatrixA(l, m);
+    public BigInteger[][] generatedMatrixA = computeMatrixA(l, m);
 
 
     // Constructor
@@ -110,7 +110,7 @@ public class IBSscheme {
         return nextIn;
     }
 
-    public BigInteger[][] calculateMatrixA(int nbRow, int nbColumn) {
+    public BigInteger[][] computeMatrixA(int nbRow, int nbColumn) {
         BigInteger[][] matrixA = new BigInteger[nbRow][nbColumn];
         for (int i = 0; i < nbRow; i++) {
             for (int j = 0; j < nbColumn; j++) {
