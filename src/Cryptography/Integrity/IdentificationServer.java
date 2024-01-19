@@ -16,16 +16,6 @@ public class IdentificationServer {
         this.IBSscheme = new IBSscheme();
     }
 
-    private byte[] hashFunctionH3(String input) {
-        try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            return digest.digest(input.getBytes());
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
     public Element[] sendPublicParameters_Sw(String ID){
         Element[] PublicParameters_Sw = new Element[6];
         PublicParameters_Sw[0] = this.IBSscheme.getP();

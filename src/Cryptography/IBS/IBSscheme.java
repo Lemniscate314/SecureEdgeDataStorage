@@ -154,6 +154,9 @@ public class IBSscheme {
             //On convertit les Elements en string
             prop.setProperty("MSK", Base64.encodeBytes(this.MSK.toBytes()));
             prop.setProperty("P", Base64.encodeBytes(this.P.toBytes()));
+            prop.setProperty("n", Base64.encodeBytes(this.n.toBytes()));
+            prop.setProperty("m", Base64.encodeBytes(this.m.toBytes()));
+            prop.setProperty("q", Base64.encodeBytes(this.q.toBytes()));
             prop.store(new FileOutputStream(configFilePath), null);
         } catch(IOException e) {e.printStackTrace();}
     }
