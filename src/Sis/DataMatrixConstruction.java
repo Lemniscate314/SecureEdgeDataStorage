@@ -85,6 +85,7 @@ public class DataMatrixConstruction {
             for (int j = 0; j < N; j++) {
                 V[i][j] = BigInteger.valueOf((long) VMatrix.getEntry(i, j)).mod(q);
             }
+
         }
 
         return V;

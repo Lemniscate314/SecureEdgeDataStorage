@@ -9,6 +9,7 @@
       <root url="jar://$USER_HOME$/Downloads/jpbc-2.0.0/jpbc-2.0.0/jars/jpbc-pbc-2.0.0.jar!/" />
       <root url="jar://$USER_HOME$/Downloads/jpbc-2.0.0/jpbc-2.0.0/jars/jpbc-mm-2.0.0.jar!/" />
       <root url="jar://$USER_HOME$/Downloads/jpbc-2.0.0/jpbc-2.0.0/jars/jpbc-plaf-2.0.0.jar!/" />
+      <root url="jar://$USER_HOME$/Downloads/commons-math3-3.6.1.jar!/" />
     </CLASSES>
     <JAVADOC />
     <SOURCES />
