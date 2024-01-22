@@ -11,6 +11,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
 import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -154,6 +155,9 @@ public class IBSscheme {
             //On convertit les Elements en string
             prop.setProperty("MSK", Base64.encodeBytes(this.MSK.toBytes()));
             prop.setProperty("P", Base64.encodeBytes(this.P.toBytes()));
+            prop.setProperty("l", Base64.encodeBytes(ByteBuffer.allocate(Integer.BYTES).putInt(this.l).array()));
+            prop.setProperty("m", Base64.encodeBytes(ByteBuffer.allocate(Integer.BYTES).putInt(this.m).array()));
+            prop.setProperty("q", Base64.encodeBytes(this.q.toByteArray()));
             prop.store(new FileOutputStream(configFilePath), null);
         } catch(IOException e) {e.printStackTrace();}
     }

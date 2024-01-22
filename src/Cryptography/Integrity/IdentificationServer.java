@@ -16,25 +16,14 @@ public class IdentificationServer {
         this.IBSscheme = new IBSscheme();
     }
 
-    private byte[] hashFunctionH3(String input) {
-        try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            return digest.digest(input.getBytes());
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-            return null;
-        }
-    }
-
-    public Element[] sendPublicParameters_Sw(String ID){
-        Element[] PublicParameters_Sw = new Element[6];
+    public Object[] sendPublicParameters_Sw(String ID){
+        Object[] PublicParameters_Sw = new Element[6];
         PublicParameters_Sw[0] = this.IBSscheme.getP();
         PublicParameters_Sw[1] = this.IBSscheme.getPK();
         PublicParameters_Sw[5] = this.IBSscheme.generate_private_key_ID(ID);
-        //je suppose que la classe s'appelle SISscheme
-        //PP[2] = this.SISscheme.getN();
-        //PP[3] = this.SISscheme.getM();
-        //PP[4] = this.SISscheme.getQ();
+        PublicParameters_Sw[2] = this.IBSscheme.getL();
+        PublicParameters_Sw[3] = this.IBSscheme.getM();
+        PublicParameters_Sw[4] = this.IBSscheme.getQ();
         return PublicParameters_Sw;
     }
 
