@@ -1,6 +1,7 @@
 package Server;
 
-import Client.EndUserIBS;
+import com.google.gson.Gson;
+
 import it.unisa.dia.gas.jpbc.Element;
 import it.unisa.dia.gas.jpbc.Field;
 import it.unisa.dia.gas.jpbc.Pairing;
@@ -18,8 +19,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Properties;
 
-public class IBSscheme {
-    EndUserIBS endUserIBS = new EndUserIBS();
+public class IdentificationServer {
     static protected Pairing pairing = PairingFactory.getPairing("src/params/curves/a.properties");
     static protected Field Zp = pairing.getZr();
     static protected Field G0 = pairing.getG1();
@@ -29,41 +29,35 @@ public class IBSscheme {
     protected Element MSK;
     protected HashMap<String, Element>  Key_couples= new HashMap();
     protected ArrayList<String> IDs= new ArrayList();
-    protected static String configFilePath = "src/Cryptography/IBS/ServerParameters.properties";
+    protected static String configFilePath = "src/Server/ServerParameters.properties";
     static SecureRandom random = new SecureRandom();
     public static int l = 2; // Primary security parameter
     public static BigInteger q = BigInteger.valueOf(l).pow(2).nextProbablePrime(); // The modulus q = next probable prime number of l^2
     public static int m = (int)(l * Math.log(q.doubleValue()) / Math.log(2)) + 1; // Ensuring m > l.log(q)
-    String jsonFunction = new Gson().toJson(new GenerateRandomNumer());
+    //On convertit la fonction en json
+    String jsonFunction = new Gson().toJson(new GenerateRandomNumber());
 
 
     // Constructor
-    public IBSscheme(){
-        generate_MSK_P();
+    public IdentificationServer(){
+        load_Public_Parameters_MSK();
         this.PK = (this.P).duplicate().mulZn(this.MSK);
-        //On reconstruit les clés privés et utilisateurs
-        Key_couples.clear();
-        build_HashMap();
     }
 
-    public Object[] sendPublicParameters_Sw(String ID){
+    public Object[] send_Public_Parameters_MSK(String ID){
         Object[] PublicParameters_Sw = new Element[6];
-        PublicParameters_Sw[0] = this.P;
-        PublicParameters_Sw[1] = this.PK;
-        PublicParameters_Sw[5] = this.generate_private_key_ID(ID);
-        PublicParameters_Sw[2] = this.l;
-        PublicParameters_Sw[3] = this.m;
-        PublicParameters_Sw[4] = this.q;
+        PublicParameters_Sw[0] = this.generate_private_key_ID(ID);
+        PublicParameters_Sw[1] = this.P;
+        PublicParameters_Sw[2] = this.PK;
+        PublicParameters_Sw[3] = this.l;
+        PublicParameters_Sw[4] = this.m;
+        PublicParameters_Sw[5] = this.q;
+        //PublicParameters_Sw[5] = this.jsonFunction;
         return PublicParameters_Sw;
     }
 
-    protected void new_IBSscheme(){
-        new_MSK_P();
-        this.PK = (this.P).duplicate().mulZn(this.MSK);
-    }
-
     //Fonction qui genere la clé privé maitre et gere la lecture dans un fichier
-    protected void generate_MSK_P(){
+    protected void load_Public_Parameters_MSK(){
         //Fichier de configuration pour stocker la clé secrète
         Properties prop = new Properties();
         InputStream in;
@@ -73,20 +67,31 @@ public class IBSscheme {
         } catch(IOException e) {e.printStackTrace();}
         String chaine1 = prop.getProperty("MSK");
         String chaine2 = prop.getProperty("P");
-        if (chaine1.length() != 0 && chaine2.length() != 0){//La clé existe et est stocké dans le fichier
-            try{
+        String chaine3 = prop.getProperty("PK");
+        String chaine4 = prop.getProperty("l");
+        String chaine5 = prop.getProperty("m");
+        String chaine6 = prop.getProperty("q");
+        if (chaine1.length() != 0 && chaine2.length() != 0 && chaine3.length() != 0 && chaine4.length() != 0 && chaine5.length() != 0 && chaine6.length() != 0) {// La clé existe et est stocké dans le fichier
+            try {
                 this.MSK = Zp.newElementFromBytes(Base64.decode(chaine1));
-                this.P = G0.newElementFromBytes(Base64.decode(chaine2));
-            } catch(IOException e) {e.printStackTrace();}
+                this.PK = G0.newElementFromBytes(Base64.decode(chaine2));
+                this.P = G0.newElementFromBytes(Base64.decode(chaine3));
+                this.l = ByteBuffer.wrap(Base64.decode(chaine4)).getInt();
+                this.m = ByteBuffer.wrap(Base64.decode(chaine5)).getInt();
+                this.q = new BigInteger(Base64.decode(chaine6));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
-        else{new_MSK_P();}
+        else{new_Public_Parameters_MSK();}
     }
 
     //Fonction qui genere une nouvelle clé privé maitre et gère l'écriture dans un fichier
-    protected void new_MSK_P(){
+    protected void new_Public_Parameters_MSK(){
         Properties prop = new Properties();
         this.MSK = Zp.newRandomElement();
         this.P = G0.newRandomElement();
+        this.PK = (this.P).duplicate().mulZn(this.MSK);
         try{
             //On convertit les Elements en string
             prop.setProperty("MSK", Base64.encodeBytes(this.MSK.toBytes()));
@@ -96,6 +101,9 @@ public class IBSscheme {
             prop.setProperty("q", Base64.encodeBytes(this.q.toByteArray()));
             prop.store(new FileOutputStream(configFilePath), null);
         } catch(IOException e) {e.printStackTrace();}
+        //On reconstruit les clés privés et utilisateurs
+        Key_couples.clear();
+        build_HashMap();
     }
 
     public Element generate_private_key_ID(String ID){

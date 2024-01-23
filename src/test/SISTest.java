@@ -3,14 +3,14 @@ package test;
 public class SISTest {
     /**
     public static void main(String[] args) {
-        // Test IBSscheme
-        IBSscheme ibs = new IBSscheme();
+        // Test IdentificationServer
+        IdentificationServer ibs = new IdentificationServer();
 
         // Test Static Variables
-        System.out.println("Static variable 'a': " + IBSscheme.a);
-        System.out.println("Static variable 'l': " + IBSscheme.l);
-        System.out.println("Static variable 'q': " + IBSscheme.q);
-        System.out.println("Static variable 'm': " + IBSscheme.m);
+        System.out.println("Static variable 'a': " + IdentificationServer.a);
+        System.out.println("Static variable 'l': " + IdentificationServer.l);
+        System.out.println("Static variable 'q': " + IdentificationServer.q);
+        System.out.println("Static variable 'm': " + IdentificationServer.m);
 
         // Test Matrix A Generation
         BigInteger[][] matrixA = ibs.generateMatrixA();

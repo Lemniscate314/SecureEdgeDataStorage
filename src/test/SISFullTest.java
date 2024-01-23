@@ -1,11 +1,11 @@
 package test;
 
 public class SISFullTest {
-    // Assuming IBSscheme and DataMatrixConstruction classes are available
+    // Assuming IdentificationServer and DataMatrixConstruction classes are available
 /**
     @Test
     public void testMatrixADimensions() {
-        IBSscheme ibs = new IBSscheme();
+        IdentificationServer ibs = new IdentificationServer();
         BigInteger[][] matrixA = ibs.generateMatrixA();
         Assertions.assertEquals(ibs.getL(), matrixA.length); // l rows
         Assertions.assertEquals(ibs.getM(), matrixA[0].length); // m columns
@@ -71,7 +71,7 @@ public class SISFullTest {
 
     @Test
     public void testMatrixVDimensions() {
-        IBSscheme ibs = new IBSscheme();
+        IdentificationServer ibs = new IdentificationServer();
         int lambda = 256;
         int N = 10;
         DataMatrixConstruction dmc = new DataMatrixConstruction(lambda, N);

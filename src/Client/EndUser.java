@@ -1,18 +1,112 @@
 package Client;
 
 import it.unisa.dia.gas.jpbc.Element;
+import it.unisa.dia.gas.jpbc.Field;
+import it.unisa.dia.gas.jpbc.Pairing;
+import it.unisa.dia.gas.plaf.jpbc.pairing.PairingFactory;
+import it.unisa.dia.gas.plaf.jpbc.util.io.Base64;
 
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.math.BigInteger;
+import java.nio.ByteBuffer;
+import java.security.SecureRandom;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
+import java.util.Map;
+
+import java.util.Properties;
 
 
 public class EndUser {
+    static protected Pairing pairing = PairingFactory.getPairing("src/params/curves/a.properties");
+    static protected Field Zp = pairing.getZr();
+    static protected Field G0 = pairing.getG1();
+    static protected Field G1 = pairing.getG2();
+    protected Element P;
+    protected Element PK;
+    protected String ID;
+    protected Element Sw;
+    private int l;     // l is the number of rows in matrix A
+    private int m;     // m is the number of columns in matrix A
+    private BigInteger q;     // The modulus, a polynomial of l
+    static SecureRandom random = new SecureRandom();
+    public static final BigInteger a = new BigInteger(128, random); // The multiplier
+    static final BigInteger I0 = new BigInteger(128, random); // Initial value of I
+    static final BigInteger C0 = new BigInteger(128, random); // Initial value of C
+    private BigInteger In; // Current value of I
+    private BigInteger Cn; // Current value of C
+    public BigInteger[][] generatedMatrixA = EndUserSIS.computeMatrixA(l, m, I0, C0, a);
+    protected static String configFilePath = "src/Cryptography/IBS/UserParameters.properties";
     protected EndUserIBS EndUserIBS;
-    //je suppose que la classe s'appelle EndUserSISsignature
-    //protected EndUserIBS EndUserSISsignature;
 
-    public void getPublicParameters_Sw(Object[] PublicParameters_Sw){
-        if (PublicParameters_Sw.length==6){
-            this.EndUserIBS.new_Sw_PK_P((Element) PublicParameters_Sw[5], (Element) PublicParameters_Sw[0], (Element) PublicParameters_Sw[1], (int) PublicParameters_Sw[2], (int )PublicParameters_Sw[3], (BigInteger) PublicParameters_Sw[4]);
+    public EndUser() {
+        this.In = I0; // Initialize In with I0
+        this.Cn = C0; // Initialize Cn with C0
+    }
+
+    // Fonction qui load les paramètres depuis le fichier configFilePath
+    // Si le fichier est vide alors elle print qu'il faut requeter le serveur
+    protected void load_Public_Parameters_Sw(Object[] PublicParameters_Sw) {
+        // Fichier de configuration pour stocker la clé secrète
+        Properties prop = new Properties();
+        InputStream in;
+        try {
+            in = new FileInputStream(configFilePath);
+            prop.load(in);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        String chaine1 = prop.getProperty("Sw");
+        String chaine2 = prop.getProperty("P");
+        String chaine3 = prop.getProperty("PK");
+        String chaine4 = prop.getProperty("l");
+        String chaine5 = prop.getProperty("m");
+        String chaine6 = prop.getProperty("q");
+        if (chaine1.length() != 0 && chaine2.length() != 0 && chaine3.length() != 0 && chaine4.length() != 0 && chaine5.length() != 0 && chaine6.length() != 0) {// La clé existe et est stocké dans le fichier
+            try {
+                this.Sw = G0.newElementFromBytes(Base64.decode(chaine1));
+                this.PK = G0.newElementFromBytes(Base64.decode(chaine2));
+                this.P = G0.newElementFromBytes(Base64.decode(chaine3));
+                this.l = ByteBuffer.wrap(Base64.decode(chaine4)).getInt();
+                this.m = ByteBuffer.wrap(Base64.decode(chaine5)).getInt();
+                this.q = new BigInteger(Base64.decode(chaine6));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            System.out.println(
+                    "Besoin de récupérer les parametres publics du serveur.\nVoir la fonction new_Sw_PK_P() de la classe EndUserIBS.");
+        }
+    }
+
+    // Fonction qui récupère les paramètres publics utiles à IBS et gère l'écriture dans un fichier
+    public void new_Public_Parameters_Sw(Object[] Public_Parameters_Sw) {
+        if (Public_Parameters_Sw.length==6){
+            Properties prop = new Properties();
+            this.Sw = (Element) Public_Parameters_Sw[0];
+            this.P = (Element) Public_Parameters_Sw[1];
+            this.PK = (Element) Public_Parameters_Sw[2];
+            this.l = (int) Public_Parameters_Sw[3];
+            this.m = (int) Public_Parameters_Sw[4];
+            this.q = (BigInteger) Public_Parameters_Sw[5];
+            //generateur de nombre pseud-aléatoire
+            //this.I=Public_Parameters_Sw[6];
+            try {
+                // On convertit les Elements en string
+                prop.setProperty("Sw", Base64.encodeBytes(this.Sw.toBytes()));
+                prop.setProperty("P", Base64.encodeBytes(this.P.toBytes()));
+                prop.setProperty("PK", Base64.encodeBytes(this.PK.toBytes()));
+                prop.setProperty("l", Base64.encodeBytes(ByteBuffer.allocate(Integer.BYTES).putInt(this.l).array()));
+                prop.setProperty("m", Base64.encodeBytes(ByteBuffer.allocate(Integer.BYTES).putInt(this.m).array()));
+                prop.setProperty("q", Base64.encodeBytes(this.q.toByteArray()));
+                prop.store(new FileOutputStream(configFilePath), null);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
         else{System.out.println("Erreur du nombres de parametres publics");}
     }
