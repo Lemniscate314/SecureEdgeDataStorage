@@ -1,6 +1,4 @@
-package Cryptography.IBS;
-
-import Sis.DataMatrixConstruction;
+package Client;
 
 import it.unisa.dia.gas.jpbc.Element;
 import it.unisa.dia.gas.jpbc.Field;
@@ -22,7 +20,7 @@ import java.util.Map;
 
 import java.util.Properties;
 
-public class EndUserIBSsignature {
+public class EndUserIBS {
     static protected Pairing pairing = PairingFactory.getPairing("src/params/curves/a.properties");
     static protected Field Zp = pairing.getZr();
     static protected Field G0 = pairing.getG1();
@@ -38,10 +36,16 @@ public class EndUserIBSsignature {
     public static final BigInteger a = new BigInteger(128, random); // The multiplier
     static final BigInteger I0 = new BigInteger(128, random); // Initial value of I
     static final BigInteger C0 = new BigInteger(128, random); // Initial value of C
+    private BigInteger In; // Current value of I
+    private BigInteger Cn; // Current value of C
+    public BigInteger[][] generatedMatrixA = computeMatrixA(l, m);
     protected static String configFilePath = "src/Cryptography/IBS/UserParameters.properties";
 
-    public EndUserIBSsignature() {
+    public EndUserIBS() {
         load_Sw_PK_P();
+        //SIS parameters initialization
+        this.In = I0; // Initialize In with I0
+        this.Cn = C0; // Initialize Cn with C0
     }
 
     public static BigInteger getA() {
@@ -109,7 +113,7 @@ public class EndUserIBSsignature {
     }
 
     public static void setConfigFilePath(String configFilePath) {
-        EndUserIBSsignature.configFilePath = configFilePath;
+        EndUserIBS.configFilePath = configFilePath;
     }
 
     // Fonction qui load les paramètres depuis le fichier configFilePath
@@ -143,7 +147,7 @@ public class EndUserIBSsignature {
             }
         } else {
             System.out.println(
-                    "Besoin de récupérer les parametres publics du serveur.\nVoir la fonction new_Sw_PK_P() de la classe EndUserIBSsignature.");
+                    "Besoin de récupérer les parametres publics du serveur.\nVoir la fonction new_Sw_PK_P() de la classe EndUserIBS.");
         }
     }
 
@@ -170,6 +174,17 @@ public class EndUserIBSsignature {
         }
     }
 
+    public BigInteger[][] computeMatrixA(int nbRow, int nbColumn) {
+        BigInteger[][] matrixA = new BigInteger[nbRow][nbColumn];
+        In = I0;
+        Cn = C0;
+        for (int i = 0; i < nbRow; i++) {
+            for (int j = 0; j < nbColumn; j++) {
+                matrixA[i][j] = generateRandomNumber(); // Using the generateRandomNumber method to generate each entry
+            }
+        }
+        return matrixA;
+    }
     public IBSsignature IBS_signature_generation(Element P, String ID, BigInteger[][] V, Object[] paramA) {
         IBSsignature sigma = new IBSsignature();
         Element k = Zp.newRandomElement();
@@ -237,35 +252,4 @@ public class EndUserIBSsignature {
         }
         return c;
     }
-    /*
-     * public IBSsignature Encryption_Basic_IBE(Element P, Element Ppub, String ID,
-     * String message){
-     * IBSsignature C = new IBSsignature();
-     * Element r = Zr.newRandomElement();
-     * C.setW1(P.duplicate().mulZn(r));
-     * byte[] IDbytes = ID.getBytes();
-     * //On applique la fonction de hachage H1 à l'ID
-     * Element Qid = G0.newElementFromHash(IDbytes, 0, IDbytes.length);
-     * //On applique le couplage sur Ppub et Qid puis le hachage par H2
-     * C.setW2(pairing.pairing(Qid, Ppub).powZn(r).toBytes());
-     * //On effectue un XOR avec le message en clair
-     * C.setW2(XOR(message.getBytes(), C.getW2()));
-     * return C;
-     * }
-     * public byte[] Decryption_Basic_IBE(Element P, Element Ppub, Element
-     * private_key_ID, IBSsignature C){
-     * byte[] M2 = pairing.pairing(private_key_ID, C.getW1()).toBytes();
-     * byte[] M = XOR(C.getW2(), M2);
-     * return M;
-     * }
-     * 
-     * public static void main(String[] args){
-     * IBSscheme schema = new IBSscheme();
-     * IBSsignature cypher = schema.Encryption_Basic_IBE(schema.P, schema.PK,
-     * "antoine.auger27@gmail.com", "Bonjour Antoine, comment vas-tu ?");
-     * byte[] plaintext = schema.Decryption_Basic_IBE(schema.P, schema.P,
-     * schema.generate_private_key_ID("antoine.auger27@gmail.com"), cypher);
-     * System.out.println(new String(plaintext, StandardCharsets.US_ASCII));
-     * }
-     */
 }

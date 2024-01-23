@@ -1,4 +1,4 @@
-package Sis;
+package Client.Sis;
 
 import java.math.BigInteger;
 
@@ -55,7 +55,7 @@ public class Data {
             V[row][i] = newV[row][0].mod(q);
         }
 
-        // Step 3: Construct a new matrix V by replacing the vector vi by v'i
+        // Step 3: Construct a new matrix V by replacing the vector vi by v'il
     }
 
 

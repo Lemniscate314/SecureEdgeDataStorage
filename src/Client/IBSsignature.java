@@ -1,4 +1,4 @@
-package Cryptography.IBS;
+package Client;
 import it.unisa.dia.gas.jpbc.Element;
 public class IBSsignature {
     protected Element w1;

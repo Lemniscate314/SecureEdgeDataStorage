@@ -1,5 +1,6 @@
-package Cryptography.IBS;
+package Server;
 
+import Client.EndUserIBS;
 import it.unisa.dia.gas.jpbc.Element;
 import it.unisa.dia.gas.jpbc.Field;
 import it.unisa.dia.gas.jpbc.Pairing;
@@ -18,7 +19,7 @@ import java.util.HashMap;
 import java.util.Properties;
 
 public class IBSscheme {
-    EndUserIBSsignature endUserIBSsignature = new EndUserIBSsignature();
+    EndUserIBS endUserIBS = new EndUserIBS();
     static protected Pairing pairing = PairingFactory.getPairing("src/params/curves/a.properties");
     static protected Field Zp = pairing.getZr();
     static protected Field G0 = pairing.getG1();
@@ -30,15 +31,10 @@ public class IBSscheme {
     protected ArrayList<String> IDs= new ArrayList();
     protected static String configFilePath = "src/Cryptography/IBS/ServerParameters.properties";
     static SecureRandom random = new SecureRandom();
-    public BigInteger a = endUserIBSsignature.getA(); // The multiplier
-    public BigInteger I0 = endUserIBSsignature.getI0();  // Initial value of I
-    public BigInteger C0 = endUserIBSsignature.getC0();  // Initial value of C
-    private BigInteger In; // Current value of I
-    private BigInteger Cn; // Current value of C
     public static int l = 2; // Primary security parameter
     public static BigInteger q = BigInteger.valueOf(l).pow(2).nextProbablePrime(); // The modulus q = next probable prime number of l^2
     public static int m = (int)(l * Math.log(q.doubleValue()) / Math.log(2)) + 1; // Ensuring m > l.log(q)
-    public BigInteger[][] generatedMatrixA = computeMatrixA(l, m);
+    String jsonFunction = new Gson().toJson(new GenerateRandomNumer());
 
 
     // Constructor
@@ -48,77 +44,17 @@ public class IBSscheme {
         //On reconstruit les clés privés et utilisateurs
         Key_couples.clear();
         build_HashMap();
-
-        //SIS parameters initialization
-        this.In = I0; // Initialize In with I0
-        this.Cn = C0; // Initialize Cn with C0
     }
 
-    public static Pairing getPairing() {
-        return pairing;
-    }
-    public static Field getZp() {
-        return Zp;
-    }
-    public static Field getG0() {
-        return G0;
-    }
-    public static Field getG1() {
-        return G1;
-    }
-    public Element getP() {
-        return P;
-    }
-    public Element getPK() {
-        return PK;
-    }
-    public Element getMSK() {
-        return MSK;
-    }
-    public HashMap<String, Element> getKey_couples() {
-        return Key_couples;
-    }
-    public ArrayList<String> getIDs() {
-        return IDs;
-    }
-    public BigInteger getIn() {
-        return In;
-    }
-    public void setIn(BigInteger in) {
-        In = in;
-    }
-
-    public BigInteger getQ() {
-        return q;
-    }
-
-    public int getL() {
-        return l;
-    }
-
-    public int getM() {
-        return m;
-    }
-
-    // Implement I, a uniform random number generator
-    public BigInteger generateRandomNumber() {
-        In = I0;
-        Cn = C0;
-        BigInteger product = a.multiply(In).add(Cn);
-        BigInteger nextIn = product.mod(q); // Calculate In+1
-        Cn = product.divide(q); // Calculate Cn+1
-        In = nextIn; // Update In for the next iteration
-        return nextIn;
-    }
-
-    public BigInteger[][] computeMatrixA(int nbRow, int nbColumn) {
-        BigInteger[][] matrixA = new BigInteger[nbRow][nbColumn];
-        for (int i = 0; i < nbRow; i++) {
-            for (int j = 0; j < nbColumn; j++) {
-                matrixA[i][j] = generateRandomNumber(); // Using the generateRandomNumber method to generate each entry
-            }
-        }
-        return matrixA;
+    public Object[] sendPublicParameters_Sw(String ID){
+        Object[] PublicParameters_Sw = new Element[6];
+        PublicParameters_Sw[0] = this.P;
+        PublicParameters_Sw[1] = this.PK;
+        PublicParameters_Sw[5] = this.generate_private_key_ID(ID);
+        PublicParameters_Sw[2] = this.l;
+        PublicParameters_Sw[3] = this.m;
+        PublicParameters_Sw[4] = this.q;
+        return PublicParameters_Sw;
     }
 
     protected void new_IBSscheme(){

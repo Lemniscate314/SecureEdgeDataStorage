@@ -1,6 +1,5 @@
-package Sis;
+package Client.Sis;
 
-import Cryptography.IBS.IBSscheme;
 import org.apache.commons.math3.linear.BlockRealMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
 
@@ -8,7 +7,6 @@ import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 public class DataMatrixConstruction {
-    IBSscheme ibSscheme = new IBSscheme();
     private final BigInteger[][] A = ibSscheme.generatedMatrixA; // Matrix A from the setup phase
     private final BigInteger q = ibSscheme.getQ();     // The modulus, a polynomial of l
     private final int m = ibSscheme.getM();     // m is the number of columns in matrix A
