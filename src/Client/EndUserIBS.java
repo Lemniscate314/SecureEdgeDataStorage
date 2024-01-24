@@ -32,7 +32,7 @@ public class EndUserIBS {
         Element P1 = G0.newRandomElement();
 
         Element r = pairing.pairing(endUser.P, P1).powZn(k);
-        sigma.setW1(pairing(block.V.toBytes() + block.paramA[0].toBytes() + block.paramA[1].toBytes() + block.paramA[2].toBytes + r.toBytes()));
+        sigma.setW1(pairing(block.VtoBytes() + block.paramAtoBytes() + r.toBytes()));
 
         sigma.setW2((endUser.Sw.duplicate().mulZn(sigma.getW1())).add(P1.duplicate().mulZn(k)));
         return sigma;
@@ -64,17 +64,7 @@ public class EndUserIBS {
         Element rprime = pairing.pairing(block.signature.getW2(), endUser.P)
                 .mul(pairing.pairing(Qid, endUser.PK.duplicate().negate()).mulZn(block.signature.getW1()));
         bool = block.signature.getW1().isEqual(pairing(
-                Vprime.toBytes() + block.paramA[0].toBytes() + block.paramA[1].toBytes() + block.paramA[2].toBytes + rprime.toBytes()));
+                Vprime.toBytes() + block.paramAtoBytes() + rprime.toBytes()));
         return bool;
-    }
-
-    private static byte[] hashFunctionH3(String input) {
-        try {
-            MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            return digest.digest(input.getBytes());
-        } catch (NoSuchAlgorithmException e) {
-            e.printStackTrace();
-            return null;
-        }
     }
 }

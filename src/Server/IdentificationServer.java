@@ -45,7 +45,7 @@ public class IdentificationServer {
     public static BigInteger q = BigInteger.valueOf(l).pow(2).nextProbablePrime(); // The modulus q = next probable prime number of l^2
     public static int m = (int)(l * Math.log(q.doubleValue()) / Math.log(2)) + 1; // Ensuring m > l.log(q)
     //On convertit la fonction en json
-    String jsonFunction = new Gson().toJson(new GenerateRandomNumber());
+    String jsonFunction = new Gson().toJson(new Serverfunctions());
 
 
     // Constructor

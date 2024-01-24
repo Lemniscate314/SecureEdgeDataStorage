@@ -12,10 +12,12 @@ public class Block {
     protected BigInteger[][] V;
     protected IBSsignature signature;
 
+
+    //load class form Json
     public static Block fromJson(String json) {
         return new Gson().fromJson(json, Block.class);
     }
-
+    //write class to Json
     public String toJson() {
         return new Gson().toJson(this);
     }
@@ -40,51 +42,51 @@ public class Block {
         }
     }
 
-    public void updateBlock(int i, BigInteger[][] X, BigInteger[][] V, String newBlock) {
+    public void updateBlock(int i, BigInteger[][] X, String newBlock) {
         // Step 1: Construct a new vector x'i using the new block D'i
         this.addBlockAtEnd(newBlock);
 
-        BigInteger[][] newX = dataMatrixConstruction.constructMatrixX(this.dataBlocks);
+        BigInteger[][] newX = EndUserSIS.constructMatrixX(this.dataBlocks);
 
         // Extract the first column of newX
         for (int row = 0; row < newX.length; row++) {
             X[row][i] = newX[row][0];
         }
         // Step 2: Compute the vector v'i = A * x'i mod q using computeMatrixV
-        BigInteger[][] newV = dataMatrixConstruction.computeMatrixV(X);
+        BigInteger[][] newV = EndUserSIS.computeMatrixV(X);
 
         // Update the V matrix with the new vector v'i
-        for (int row = 0; row < l; row++) {
+        for (int row = 0; row < V.length; row++) {
             V[row][i] = newV[row][0];
         }
 
         // Step 3: Construct a new matrix V by replacing the vector vi by v'i
     }
 
-    public void insertBlock(int i, BigInteger[][] X, BigInteger[][] V, String newDataBlock) {
+    public void insertBlock(int i, BigInteger[][] X, String newDataBlock) {
         // Step 1: Construct a new vector x'i using the new block D'i
         this.addBlockAtEnd(newDataBlock);
         X[i] = EndUserSIS.constructMatrixX(this.dataBlocks)[0];
 
         // Step 2: Compute the vector v'i = A * x'i mod q using computeMatrixV
-        BigInteger[][] newV = dataMatrixConstruction.computeMatrixV(X);
+        BigInteger[][] newV = EndUserSIS.computeMatrixV(X);
 
         // Update the V matrix with the new vector v'i
-        for (int row = 0; row < l; row++) {
+        for (int row = 0; row < V.length; row++) {
             V[row][i] = newV[row][0];
         }
 
         // Step 3: Add the new vector v'i into the matrix V
         // Step 4: Increase by 1 the indexes of the data blocks that are greater than i
-        for (int j = N - 1; j >= i; j--) {
-            for (int row = 0; row < l; row++) {
+        for (int j = V[0].length - 1; j >= i; j--) {
+            for (int row = 0; row < V.length; row++) {
                 V[row][j + 1] = V[row][j];
             }
         }
-        for (int row = 0; row < l; row++) {
+        for (int row = 0; row < V.length; row++) {
             V[row][i] = V[row][i].add(A[row][i].multiply(X[row][0]));
         }
-        N++;
+        N++; // N = V[0].length
     }
 
     public void addBlockAtEnd(String newBlock) {

@@ -14,21 +14,11 @@ public class EndUserSIS {
         BigInteger Cn = paramA[2];
         for (int i = 0; i < endUser.l; i++) {
             for (int j = 0; j < endUser.m; j++) {
-                matrixA[i][j] = GenerateRandomNumber.generateRandomNumber(In, paramA[1], Cn, endUser.q); // Using the generateRandomNumber method to generate each entry
+                matrixA[i][j] = FunctionsFromServer.generateRandomNumber(In, paramA[1], Cn, endUser.q); // Using the generateRandomNumber method to generate each entry
             }
         }
         return matrixA;
     }
-    // Hash function H3
-    public static byte[] hashFunctionH3(String data) {
-        try {
-            MessageDigest md = MessageDigest.getInstance("SHA-256");
-            return md.digest(data.getBytes());
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("Hashing algorithm not found", e);
-        }
-    }
-
     // Constructs the matrix X by hashing each Block block and filling the vectors xi. N is m*N
     public static BigInteger[][] constructMatrixX(EndUser endUser, int N, String[] dataBlocks) {
         if (dataBlocks.length != N) {
@@ -39,7 +29,7 @@ public class EndUserSIS {
 
         for (int i = 0; i < endUser.m; i++) {
             for (int j = 0; j < N; j++) {
-                byte[] hash = hashFunctionH3(dataBlocks[j]); // Hashing each Block block
+                byte[] hash = FunctionsFromServer.hashFunctionH3(dataBlocks[j]); // Hashing each Block block
 
                 // Calculate the starting index for each injection
                 int bitIndex = i % endUser.lambda;
