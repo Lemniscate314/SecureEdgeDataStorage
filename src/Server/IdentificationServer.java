@@ -136,6 +136,15 @@ public class IdentificationServer {
         return PublicParameters_Sw;
     }
 
+    // Helper method to convert public parameters to a String
+    private String publicParametersToString(Object[] publicParameters) {
+        StringBuilder stringBuilder = new StringBuilder();
+        for (Object parameter : publicParameters) {
+            stringBuilder.append(parameter.toString()).append("\n");
+        }
+        return stringBuilder.toString();
+    }
+
     public static void main(String[] args) {
         SpringApplication.run(IdentificationServer.class, args);
     }
@@ -148,7 +157,10 @@ public class IdentificationServer {
         @GetMapping("/getPublicParameters")
         public ResponseEntity<Object[]> getPublicParameters(@RequestParam String id) {
             IdentificationServer identificationServer = new IdentificationServer();
+            // Call the method to get public parameters
             Object[] publicParameters = identificationServer.send_Public_Parameters_MSK(id);
+            // Print the response before sending it to the client
+            System.out.println("Server Response: " + identificationServer.publicParametersToString(publicParameters));
             return ResponseEntity.ok(publicParameters);
         }
     }

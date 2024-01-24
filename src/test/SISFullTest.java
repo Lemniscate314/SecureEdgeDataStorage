@@ -1,7 +1,7 @@
 package test;
 
 public class SISFullTest {
-    // Assuming IdentificationServer and DataMatrixConstruction classes are available
+    // Assuming IdentificationServer and EndUserSIS classes are available
 /**
     @Test
     public void testMatrixADimensions() {
@@ -14,11 +14,11 @@ public class SISFullTest {
     @Test
     public void testMatrixXDimensions() {
         int lambda = 256; // Example lambda value
-        int N = 10;       // Example number of data blocks
-        DataMatrixConstruction dmc = new DataMatrixConstruction(lambda, N);
+        int N = 10;       // Example number of Block blocks
+        EndUserSIS dmc = new EndUserSIS(lambda, N);
         String[] dataBlocks = new String[N];
         for (int i = 0; i < N; i++) {
-            dataBlocks[i] = "Data block " + (i + 1);
+            dataBlocks[i] = "DataManipulation block " + (i + 1);
         }
         BigInteger[][] matrixX = dmc.constructMatrixX(dataBlocks);
         Assertions.assertEquals(N, matrixX.length); // N rows
@@ -29,16 +29,16 @@ public class SISFullTest {
     public void testMatrixVChangeOnDataBlockChange() {
         int lambda = 256;
         int N = 5;
-        DataMatrixConstruction dmc = new DataMatrixConstruction(lambda, N);
+        EndUserSIS dmc = new EndUserSIS(lambda, N);
 
-        // Generate matrix V for one set of data blocks
+        // Generate matrix V for one set of Block blocks
         String[] dataBlocks1 = {"Block1", "Block2", "Block3", "Block4", "Block5"};
         BigInteger[][] matrixV1 = dmc.computeMatrixV(dmc.constructMatrixX(dataBlocks1));
 
-        // Generate matrix V for another set of data blocks with one block changed
+        // Generate matrix V for another set of Block blocks with one block changed
         String[] dataBlocks2 = {"Block1", "Block2", "Block3", "Block4", "Block6"};
         BigInteger[][] matrixV2 = dmc.computeMatrixV(dmc.constructMatrixX(dataBlocks2));
-        // Check if matrix V changes when one data block is changed
+        // Check if matrix V changes when one Block block is changed
         boolean isDifferent = false;
         for (int i = 0; i < matrixV1.length; i++) {
             for (int j = 0; j < matrixV1[0].length; j++) {
@@ -50,15 +50,15 @@ public class SISFullTest {
             if (isDifferent) break;
         }
 
-        assertTrue(isDifferent, "Matrix V should change when a data block is changed");
+        assertTrue(isDifferent, "Matrix V should change when a Block block is changed");
     }
 
     @Test
     public void testHashFunctionH3() {
         int lambda = 256;
         int N = 5;
-        DataMatrixConstruction dmc = new DataMatrixConstruction(lambda, N);
-        String dataBlock = "Test Data";
+        EndUserSIS dmc = new EndUserSIS(lambda, N);
+        String dataBlock = "Test DataManipulation";
 
         byte[] hash1 = dmc.hashFunctionH3(dataBlock);
         byte[] hash2 = dmc.hashFunctionH3(dataBlock);
@@ -74,10 +74,10 @@ public class SISFullTest {
         IdentificationServer ibs = new IdentificationServer();
         int lambda = 256;
         int N = 10;
-        DataMatrixConstruction dmc = new DataMatrixConstruction(lambda, N);
+        EndUserSIS dmc = new EndUserSIS(lambda, N);
         String[] dataBlocks = new String[N];
         for (int i = 0; i < N; i++) {
-            dataBlocks[i] = "Data block " + (i + 1);
+            dataBlocks[i] = "DataManipulation block " + (i + 1);
         }
         BigInteger[][] matrixX = dmc.constructMatrixX(dataBlocks);
         BigInteger[][] matrixV = dmc.computeMatrixV(matrixX);

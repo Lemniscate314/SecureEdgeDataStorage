@@ -13,10 +13,6 @@ import java.io.InputStream;
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.security.SecureRandom;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Properties;
 
 import org.springframework.http.ResponseEntity;
@@ -32,16 +28,17 @@ public class EndUser {
     protected Element PK;
     protected String ID;
     protected Element Sw;
-    private int l;     // l is the number of rows in matrix A
-    private int m;     // m is the number of columns in matrix A
-    private BigInteger q;     // The modulus, a polynomial of l
-    static SecureRandom random = new SecureRandom();
-    public static final BigInteger a = new BigInteger(128, random); // The multiplier
-    static final BigInteger I0 = new BigInteger(128, random); // Initial value of I
-    static final BigInteger C0 = new BigInteger(128, random); // Initial value of C
-    private BigInteger In; // Current value of I
-    private BigInteger Cn; // Current value of C
-    public BigInteger[][] generatedMatrixA = EndUserSIS.computeMatrixA(l, m, I0, C0, a);
+    protected int l;     // l is the number of rows in matrix A
+    protected int m;     // m is the number of columns in matrix A
+    protected BigInteger q;     // The modulus, a polynomial of l
+    protected final static int lambda = 256;       // Parameter lambda
+    protected static SecureRandom random = new SecureRandom();
+    protected static final BigInteger a = new BigInteger(128, random); // The multiplier
+    protected static final BigInteger I0 = new BigInteger(128, random); // Initial value of I
+    protected static final BigInteger C0 = new BigInteger(128, random); // Initial value of C
+    protected BigInteger In; // Current value of I
+    protected BigInteger Cn; // Current value of C
+    protected BigInteger[][] generatedMatrixA = EndUserSIS.computeMatrixA(l, m, I0, C0, a);
     protected static String configFilePath = "src/Cryptography/IBS/UserParameters.properties";
     protected boolean loadingSuccessful; //Attribut permettant de determiner si une requete au server est necessaire
 

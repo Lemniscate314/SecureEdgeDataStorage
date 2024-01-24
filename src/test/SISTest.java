@@ -17,15 +17,15 @@ public class SISTest {
         System.out.println("Matrix A:");
         printMatrix(matrixA);
 
-        // Initialize DataMatrixConstruction with lambda and N
+        // Initialize EndUserSIS with lambda and N
         int lambda = 256; // Example lambda value
-        int N = 3;       // Example number of data blocks
-        DataMatrixConstruction dmc = new DataMatrixConstruction(lambda, N);
+        int N = 3;       // Example number of Block blocks
+        EndUserSIS dmc = new EndUserSIS(lambda, N);
 
-        // Prepare data blocks for testing
+        // Prepare Block blocks for testing
         String[] dataBlocks = new String[N];
         for (int i = 0; i < N; i++) {
-            dataBlocks[i] = "Data block " + (i + 1);
+            dataBlocks[i] = "DataManipulation block " + (i + 1);
         }
         System.out.println("\nData blocks:");
         System.out.println(Arrays.toString(dataBlocks));

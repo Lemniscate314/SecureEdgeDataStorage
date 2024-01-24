@@ -26,19 +26,19 @@ public class EndUserIBS {
     static protected Field G0 = pairing.getG1();
     static protected Field G1 = pairing.getG2();
 
-    public IBSsignature IBS_signature_generation(Element P, String ID, BigInteger[][] V, Object[] paramA) {
+    public static IBSsignature IBS_signature_generation(Element P, String ID, Element Sw, BigInteger[][] V, Object[] paramA) {
         IBSsignature sigma = new IBSsignature();
         Element k = Zp.newRandomElement();
         Element P1 = G0.newRandomElement();
 
-        Element r = pairing.pairing(this.P, P1).powZn(k);
+        Element r = pairing.pairing(P, P1).powZn(k);
         sigma.setW1(pairing(V.toBytes() + paramA[0].toBytes() + paramA[1].toBytes() + paramA[2].toBytes + r.toBytes()));
 
         sigma.setW2((Sw.duplicate().mulZn(sigma.getW1())).add(P1.duplicate().mulZn(k)));
         return sigma;
     }
 
-    public boolean IBS_signature_verification(IBSsignature signature, String IDw, HashMap<String, String> dataBlocksI,
+    public static boolean IBS_signature_verification(Element P, Element PK, IBSsignature signature, String IDw, HashMap<String, String> dataBlocksI,
             Object[] paramA, BigInteger[][] V) {
         boolean bool = false;
         // On initialise des tableaux qui vont stocker les données récupérées et le
@@ -54,18 +54,18 @@ public class EndUserIBS {
             i++;
         }
         // On construit les vecteurs xi
-        BigInteger[][] X = constructMatrixX(dataBlocks);
+        BigInteger[][] X = EndUserSIS.constructMatrixX(dataBlocks);
         // On reconstrut la matrice A à partir des paramA reçus
-        BigInteger[][] A = generateMatrixA(paramA[0], paramA[1], paramA[2]);
+        BigInteger[][] A = EndUserSIS.generateMatrixA(paramA[0], paramA[1], paramA[2]);
 
         // On construit la matrice V' que l'on complète avec V
-        BigInteger[][] W = computeMatrixV(A, X);
+        BigInteger[][] W = EndUserSIS.computeMatrixV(A, X);
         BigInteger[][] Vprime = V;
         for (i = 0; i < dataNumber.length; i++) {
             Vprime[dataNumber[i]] = W[dataNumber[i]];
         }
 
-        byte[] IDbytes = ID.getBytes();
+        byte[] IDbytes = IDw.getBytes();
         // On applique la fonction de hachage H1 à l'ID
         Element Qid = G0.newElementFromHash(IDbytes, 0, IDbytes.length);
 
@@ -76,7 +76,7 @@ public class EndUserIBS {
         return bool;
     }
 
-    private byte[] hashFunctionH3(String input) {
+    private static byte[] hashFunctionH3(String input) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
             return digest.digest(input.getBytes());
@@ -84,13 +84,5 @@ public class EndUserIBS {
             e.printStackTrace();
             return null;
         }
-    }
-
-    protected byte[] XOR(byte[] a, byte[] b) {
-        byte[] c = new byte[a.length];
-        for (int i = 0; i < a.length; i++) {
-            c[i] = (byte) ((int) a[i] ^ (int) b[i]);
-        }
-        return c;
     }
 }
