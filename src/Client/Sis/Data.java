@@ -16,6 +16,7 @@ public class Data {
         this.A = A;
         this.q = q;
         this.dataMatrixConstruction = dataMatrixConstruction;
+        this.dataBlocks =  new String[N];
     }
 
     // Data deletion
@@ -30,18 +31,20 @@ public class Data {
 
         // Step 3: Decrease by 1 the indexes of data blocks that are larger than i
         for (int j = i + 1; j < N; j++) {
-            for (int row = 0; row < l; row++) {
-                V[row][j - 1] = V[row][j];
+            if (j - 1 >= 0) {
+                for (int row = 0; row < l; row++) {
+                    V[row][j - 1] = V[row][j];
+                }
             }
         }
         N--;
     }
 
-    // Data modification
-    // Data modification
     public void updateBlock(int i, BigInteger[][] X, BigInteger[][] V, String newBlock) {
         // Step 1: Construct a new vector x'i using the new block D'i
-        BigInteger[][] newX = dataMatrixConstruction.constructMatrixX(new String[]{newBlock});  // Note: Pass an array of size 1
+        this.addBlockAtEnd(newBlock);
+
+        BigInteger[][] newX = dataMatrixConstruction.constructMatrixX(this.dataBlocks);
 
         // Extract the first column of newX
         for (int row = 0; row < newX.length; row++) {
@@ -52,23 +55,23 @@ public class Data {
 
         // Update the V matrix with the new vector v'i
         for (int row = 0; row < l; row++) {
-            V[row][i] = newV[row][0].mod(q);
+            V[row][i] = newV[row][0];
         }
 
-        // Step 3: Construct a new matrix V by replacing the vector vi by v'il
+        // Step 3: Construct a new matrix V by replacing the vector vi by v'i
     }
-
 
     public void insertBlock(int i, BigInteger[][] X, BigInteger[][] V, String newDataBlock) {
         // Step 1: Construct a new vector x'i using the new block D'i
-        X[i] = this.dataMatrixConstruction.constructMatrixX(new String[]{newDataBlock})[0];
+        this.addBlockAtEnd(newDataBlock);
+        X[i] = this.dataMatrixConstruction.constructMatrixX(this.dataBlocks)[0];
 
         // Step 2: Compute the vector v'i = A * x'i mod q using computeMatrixV
         BigInteger[][] newV = dataMatrixConstruction.computeMatrixV(X);
 
         // Update the V matrix with the new vector v'i
         for (int row = 0; row < l; row++) {
-            V[row][i] = newV[row][0].mod(q);
+            V[row][i] = newV[row][0];
         }
 
         // Step 3: Add the new vector v'i into the matrix V
@@ -79,9 +82,18 @@ public class Data {
             }
         }
         for (int row = 0; row < l; row++) {
-            V[row][i] = V[row][i].add(A[row][i].multiply(X[i][0])).mod(q);
+            V[row][i] = V[row][i].add(A[row][i].multiply(X[row][0]));
         }
         N++;
+    }
+
+    public void addBlockAtEnd(String newBlock) {
+        for (int i = 0; i < this.dataBlocks.length; i++) {
+            if (this.dataBlocks[i] == null) {
+                this.dataBlocks[i] = newBlock;
+                return;
+            }
+        }
     }
 
 }
