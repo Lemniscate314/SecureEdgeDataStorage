@@ -19,6 +19,16 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Properties;
 
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
+@SpringBootApplication
+
 public class IdentificationServer {
     static protected Pairing pairing = PairingFactory.getPairing("src/params/curves/a.properties");
     static protected Field Zp = pairing.getZr();
@@ -42,18 +52,6 @@ public class IdentificationServer {
     public IdentificationServer(){
         load_Public_Parameters_MSK();
         this.PK = (this.P).duplicate().mulZn(this.MSK);
-    }
-
-    public Object[] send_Public_Parameters_MSK(String ID){
-        Object[] PublicParameters_Sw = new Element[6];
-        PublicParameters_Sw[0] = this.generate_private_key_ID(ID);
-        PublicParameters_Sw[1] = this.P;
-        PublicParameters_Sw[2] = this.PK;
-        PublicParameters_Sw[3] = this.l;
-        PublicParameters_Sw[4] = this.m;
-        PublicParameters_Sw[5] = this.q;
-        //PublicParameters_Sw[5] = this.jsonFunction;
-        return PublicParameters_Sw;
     }
 
     //Fonction qui genere la clé privé maitre et gere la lecture dans un fichier
@@ -83,7 +81,10 @@ public class IdentificationServer {
                 e.printStackTrace();
             }
         }
-        else{new_Public_Parameters_MSK();}
+        else{
+            System.out.println("On genere de nouveaux paramètres publics.");
+            new_Public_Parameters_MSK();
+        }
     }
 
     //Fonction qui genere une nouvelle clé privé maitre et gère l'écriture dans un fichier
@@ -121,5 +122,34 @@ public class IdentificationServer {
     }
     protected void build_HashMap(){
         for (String adresse: IDs){generate_private_key_ID(adresse);}
+    }
+
+    public Object[] send_Public_Parameters_MSK(String ID){
+        Object[] PublicParameters_Sw = new Element[6];
+        PublicParameters_Sw[0] = this.generate_private_key_ID(ID);
+        PublicParameters_Sw[1] = this.P;
+        PublicParameters_Sw[2] = this.PK;
+        PublicParameters_Sw[3] = this.l;
+        PublicParameters_Sw[4] = this.m;
+        PublicParameters_Sw[5] = this.q;
+        PublicParameters_Sw[5] = this.jsonFunction;
+        return PublicParameters_Sw;
+    }
+
+    public static void main(String[] args) {
+        SpringApplication.run(IdentificationServer.class, args);
+    }
+
+    //Class permettant de repondre au requêtes afin de d'envoyer les Public Parameters
+    // et la clé privé associé à l'id reçus par le server
+    @RestController
+    @RequestMapping("/api")
+    public static class ServerController {
+        @GetMapping("/getPublicParameters")
+        public ResponseEntity<Object[]> getPublicParameters(@RequestParam String id) {
+            IdentificationServer identificationServer = new IdentificationServer();
+            Object[] publicParameters = identificationServer.send_Public_Parameters_MSK(id);
+            return ResponseEntity.ok(publicParameters);
+        }
     }
 }

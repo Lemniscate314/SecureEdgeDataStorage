@@ -17,8 +17,10 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.Map;
-
 import java.util.Properties;
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestTemplate;
 
 
 public class EndUser {
@@ -41,16 +43,18 @@ public class EndUser {
     private BigInteger Cn; // Current value of C
     public BigInteger[][] generatedMatrixA = EndUserSIS.computeMatrixA(l, m, I0, C0, a);
     protected static String configFilePath = "src/Cryptography/IBS/UserParameters.properties";
-    protected EndUserIBS EndUserIBS;
+    protected boolean loadingSuccessful; //Attribut permettant de determiner si une requete au server est necessaire
 
-    public EndUser() {
+    public EndUser(String email) {
+        this.ID=email;
         this.In = I0; // Initialize In with I0
         this.Cn = C0; // Initialize Cn with C0
+        this.loadingSuccessful=load_Public_Parameters_Sw();
     }
 
     // Fonction qui load les paramètres depuis le fichier configFilePath
     // Si le fichier est vide alors elle print qu'il faut requeter le serveur
-    protected void load_Public_Parameters_Sw(Object[] PublicParameters_Sw) {
+    protected boolean load_Public_Parameters_Sw() {
         // Fichier de configuration pour stocker la clé secrète
         Properties prop = new Properties();
         InputStream in;
@@ -77,9 +81,11 @@ public class EndUser {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        } else {
-            System.out.println(
-                    "Besoin de récupérer les parametres publics du serveur.\nVoir la fonction new_Sw_PK_P() de la classe EndUserIBS.");
+            return true;
+        }
+        else {
+            System.out.println("Besoin de récupérer les parametres publics du serveur.");
+            return false;
         }
     }
 
@@ -109,5 +115,23 @@ public class EndUser {
             }
         }
         else{System.out.println("Erreur du nombres de parametres publics");}
+    }
+
+    public static void main(String[] args) {
+        String mail= "antoine@gmail.com";
+        EndUser endUser = new EndUser(mail);
+        if (endUser.loadingSuccessful==false) { //On requete le serveur puisque le le loading a echoue
+            String serverUrl = "http://localhost:80/api/getPublicParameters?id=" + endUser.ID;
+
+            // Use RestTemplate to make a GET request to the server
+            RestTemplate restTemplate = new RestTemplate();
+            ResponseEntity<Object[]> response = restTemplate.getForEntity(serverUrl, Object[].class);
+
+            // Extract the public parameters from the response
+            Object[] publicParameters = response.getBody();
+
+            // Use the public parameters as needed
+            // ...
+        }
     }
 }
