@@ -16,23 +16,23 @@ public class Test {
 
         // Create instances of EndUserSIS and DataManipulation
         EndUserSIS endUserSIS = new EndUserSIS(N);
-        DataManipulation dataManipulation = new DataManipulation(l, N, A, q, endUserSIS);
+        Data data= new Data(l, N, A, q, endUserSIS);
 
         // Test deleteBlock
         BigInteger[][] VDelete = generateSampleMatrix(l, N);  // Replace with actual dataManipulation
-        dataManipulation.deleteBlock(2, VDelete);
+        data.deleteBlock(2, VDelete);
         printMatrix("VDelete", VDelete);
 
         // Test updateBlock
         BigInteger[][] XUpdate = generateSampleMatrix(m, 1);  // Replace with actual dataManipulation
         BigInteger[][] VUpdate = generateSampleMatrix(l, N);  // Replace with actual dataManipulation
-        dataManipulation.updateBlock(1, XUpdate, VUpdate, "newBlock");
+        data.updateBlock(1, XUpdate, VUpdate, "newBlock");
         printMatrix("VUpdate", VUpdate);
 
         // Test insertBlock
         BigInteger[][] XInsert = generateSampleMatrix(m, 1);  // Replace with actual dataManipulation
         BigInteger[][] VInsert = generateSampleMatrix(l, N);  // Replace with actual dataManipulation
-        dataManipulation.insertBlock(3, XInsert, VInsert, "newDataBlock");
+        data.insertBlock(3, XInsert, VInsert, "newDataBlock");
         printMatrix("VInsert", VInsert);
     }
 

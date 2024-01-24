@@ -33,12 +33,12 @@ public class EndUser {
     protected BigInteger q;     // The modulus, a polynomial of l
     protected final static int lambda = 256;       // Parameter lambda
     protected static SecureRandom random = new SecureRandom();
-    protected static final BigInteger a = new BigInteger(128, random); // The multiplier
     protected static final BigInteger I0 = new BigInteger(128, random); // Initial value of I
+    protected static final BigInteger a = new BigInteger(128, random); // The multiplier
     protected static final BigInteger C0 = new BigInteger(128, random); // Initial value of C
+    protected static final BigInteger[] paramA = {I0, a, C0}; //parameters to regenerate A
     protected BigInteger In; // Current value of I
     protected BigInteger Cn; // Current value of C
-    protected BigInteger[][] generatedMatrixA = EndUserSIS.computeMatrixA(l, m, I0, C0, a);
     protected static String configFilePath = "src/Cryptography/IBS/UserParameters.properties";
     protected boolean loadingSuccessful; //Attribut permettant de determiner si une requete au server est necessaire
 

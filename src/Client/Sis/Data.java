@@ -1,15 +1,10 @@
 package Client.Sis;
 
+import Client.EndUserSIS;
+
 import java.math.BigInteger;
 
 public class Data {
-    private int l;              // Number of rows in matrix A
-    private int N;              // Number of data blocks
-    private BigInteger[][] A;   // Matrix A from the setup phase
-    private BigInteger q;       // The modulus, a polynomial of l
-    private DataMatrixConstruction dataMatrixConstruction;
-    private String[] dataBlocks;
-
     public Data(int l, int N, BigInteger[][] A, BigInteger q, DataMatrixConstruction dataMatrixConstruction) {
         this.l = l;
         this.N = N;

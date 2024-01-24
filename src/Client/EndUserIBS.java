@@ -26,53 +26,45 @@ public class EndUserIBS {
     static protected Field G0 = pairing.getG1();
     static protected Field G1 = pairing.getG2();
 
-    public static IBSsignature IBS_signature_generation(Element P, String ID, Element Sw, BigInteger[][] V, Object[] paramA) {
+    public static IBSsignature IBS_signature_generation(EndUser endUser, Block block) {
         IBSsignature sigma = new IBSsignature();
         Element k = Zp.newRandomElement();
         Element P1 = G0.newRandomElement();
 
-        Element r = pairing.pairing(P, P1).powZn(k);
-        sigma.setW1(pairing(V.toBytes() + paramA[0].toBytes() + paramA[1].toBytes() + paramA[2].toBytes + r.toBytes()));
+        Element r = pairing.pairing(endUser.P, P1).powZn(k);
+        sigma.setW1(pairing(block.V.toBytes() + block.paramA[0].toBytes() + block.paramA[1].toBytes() + block.paramA[2].toBytes + r.toBytes()));
 
-        sigma.setW2((Sw.duplicate().mulZn(sigma.getW1())).add(P1.duplicate().mulZn(k)));
+        sigma.setW2((endUser.Sw.duplicate().mulZn(sigma.getW1())).add(P1.duplicate().mulZn(k)));
         return sigma;
     }
 
-    public static boolean IBS_signature_verification(Element P, Element PK, IBSsignature signature, String IDw, HashMap<String, String> dataBlocksI,
-            Object[] paramA, BigInteger[][] V) {
+    public static boolean IBS_signature_verification(EndUser endUser, Block block) {
         boolean bool = false;
-        // On initialise des tableaux qui vont stocker les données récupérées et le
-        // numero de block associé (contenu dans le HashMap)
-        String[] dataBlocks = new String[dataBlocksI.size()];
-        int[] dataNumber = new int[dataBlocksI.size()];
 
-        // Parcourir la HashMap et mettre chaque blocket numero de block dans le tableau
-        int i = 0;
-        for (Map.Entry<String, String> entry : dataBlocksI.entrySet()) {
-            dataBlocks[i] = entry.getValue();
-            dataNumber[i] = Integer.parseInt(entry.getValue());
-            i++;
-        }
-        // On construit les vecteurs xi
-        BigInteger[][] X = EndUserSIS.constructMatrixX(dataBlocks);
+        String [] D = new String [1];
+        D[0] = block.Di;
+        // On construit le vecteur xi
+        BigInteger[][] X = EndUserSIS.constructMatrixX(endUser, block.V.length, D);
         // On reconstrut la matrice A à partir des paramA reçus
-        BigInteger[][] A = EndUserSIS.generateMatrixA(paramA[0], paramA[1], paramA[2]);
+        BigInteger[][] A = EndUserSIS.computeMatrixA(endUser, block.paramA);
 
         // On construit la matrice V' que l'on complète avec V
-        BigInteger[][] W = EndUserSIS.computeMatrixV(A, X);
-        BigInteger[][] Vprime = V;
-        for (i = 0; i < dataNumber.length; i++) {
-            Vprime[dataNumber[i]] = W[dataNumber[i]];
+        BigInteger[][] W = EndUserSIS.computeMatrixV(endUser, block.V.length, A, X);
+        BigInteger[][] Vprime = block.V;
+        for (int i = 0; i < Vprime[block.i].length; i++) {
+            if (block.i==i) {
+                Vprime[block.i][i] = W[0][i];
+            }
         }
 
-        byte[] IDbytes = IDw.getBytes();
+        byte[] IDbytes = block.IDw.getBytes();
         // On applique la fonction de hachage H1 à l'ID
         Element Qid = G0.newElementFromHash(IDbytes, 0, IDbytes.length);
 
-        Element rprime = pairing.pairing(signature.getW2(), P)
-                .mul(pairing.pairing(Qid, PK.duplicate().negate()).mulZn(signature.getW1()));
-        bool = signature.getW1().isEqual(pairing(
-                Vprime.toBytes() + paramA[0].toBytes() + paramA[1].toBytes() + paramA[2].toBytes + rprime.toBytes()));
+        Element rprime = pairing.pairing(block.signature.getW2(), endUser.P)
+                .mul(pairing.pairing(Qid, endUser.PK.duplicate().negate()).mulZn(block.signature.getW1()));
+        bool = block.signature.getW1().isEqual(pairing(
+                Vprime.toBytes() + block.paramA[0].toBytes() + block.paramA[1].toBytes() + block.paramA[2].toBytes + rprime.toBytes()));
         return bool;
     }
 
