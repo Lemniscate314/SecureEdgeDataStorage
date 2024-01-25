@@ -33,10 +33,10 @@ public class EndUser {
     protected BigInteger q;     // The modulus, a polynomial of l
     protected final static int lambda = 256;       // Parameter lambda
     protected static SecureRandom random = new SecureRandom();
-    protected static final BigInteger I0 = new BigInteger(128, random); // Initial value of I
-    protected static final BigInteger a = new BigInteger(128, random); // The multiplier
-    protected static final BigInteger C0 = new BigInteger(128, random); // Initial value of C
-    protected static final BigInteger[] paramA = {I0, a, C0}; //parameters to regenerate A
+    protected BigInteger I0; // Initial value of I
+    protected BigInteger a; // The multiplier
+    protected BigInteger C0; // Initial value of C
+    protected BigInteger[] paramA; //parameters to regenerate A
     protected BigInteger In; // Current value of I
     protected BigInteger Cn; // Current value of C
     protected static String configFilePath = "src/Cryptography/IBS/UserParameters.properties";
@@ -44,9 +44,63 @@ public class EndUser {
 
     public EndUser(String email) {
         this.ID=email;
+        this.loadingSuccessful=load_Public_Parameters_Sw();
+        load_ParamA();
+        this.paramA = new BigInteger[]{this.I0, this.a, this.C0};
         this.In = I0; // Initialize In with I0
         this.Cn = C0; // Initialize Cn with C0
-        this.loadingSuccessful=load_Public_Parameters_Sw();
+    }
+
+    // Fonction qui load les paramètres de la matrice A depuis le fichier configFilePath
+    // Si le fichier est vide alors elle génère de nouveau paramA
+    protected boolean load_ParamA() {
+        // Fichier de configuration pour stocker la clé secrète
+        Properties prop = new Properties();
+        InputStream in;
+        try {
+            in = new FileInputStream(configFilePath);
+            prop.load(in);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        String chaine1 = prop.getProperty("I0");
+        String chaine2 = prop.getProperty("a");
+        String chaine3 = prop.getProperty("C0");
+        if (chaine1.length() != 0 && chaine2.length() != 0 && chaine3.length() != 0 ) {// La clé existe et est stocké dans le fichier
+            try {
+                this.I0 = new BigInteger(Base64.decode(chaine1));
+                this.a = new BigInteger(Base64.decode(chaine2));
+                this.C0 = new BigInteger(Base64.decode(chaine3));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            System.out.println("Loading successful");
+            return true;
+        }
+        else {
+            System.out.println("Nouveaux Paramètres pour la matrice A.");
+            return false;
+        }
+    }
+
+    // Fonction qui génère de nouveaux paramètre de la matrice A et gère l'écriture dans un fichier
+    public void new_ParamA() {
+        Properties prop = new Properties();
+        this.I0 = new BigInteger(128, random); // Initial value of I
+        this.a = new BigInteger(128, random); // The multiplier
+        this.C0 = new BigInteger(128, random); // Initial value of C
+
+        //generateur de nombre pseud-aléatoire
+        //this.I=Public_Parameters_Sw[6];
+        try {
+            // On convertit les Elements en string
+            prop.setProperty("I0", Base64.encodeBytes(this.I0.toByteArray()));
+            prop.setProperty("a", Base64.encodeBytes(this.a.toByteArray()));
+            prop.setProperty("C0", Base64.encodeBytes(this.C0.toByteArray()));
+            prop.store(new FileOutputStream(configFilePath), null);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     // Fonction qui load les paramètres depuis le fichier configFilePath
@@ -78,6 +132,7 @@ public class EndUser {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+            System.out.println("Loading successful");
             return true;
         }
         else {
@@ -86,7 +141,7 @@ public class EndUser {
         }
     }
 
-    // Fonction qui récupère les paramètres publics utiles à IBS et gère l'écriture dans un fichier
+    // Fonction qui récupère les paramètres publics et gère l'écriture dans un fichier
     public void new_Public_Parameters_Sw(Object[] Public_Parameters_Sw) {
         if (Public_Parameters_Sw.length==6){
             Properties prop = new Properties();

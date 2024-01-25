@@ -3,7 +3,7 @@ package Client;
 import com.google.gson.Gson;
 import java.math.BigInteger;
 
-public class Block {
+public class Blocks {
     protected int dataID;
     protected String IDw;
     protected int i;
@@ -14,12 +14,48 @@ public class Block {
 
 
     //load class form Json
-    public static Block fromJson(String json) {
-        return new Gson().fromJson(json, Block.class);
+    public static Blocks fromJson(String json) {
+        return new Gson().fromJson(json, Blocks.class);
     }
     //write class to Json
     public String toJson() {
         return new Gson().toJson(this);
+    }
+    public static byte[] VtoBytes(BigInteger[][] V){
+
+        // Taille totale du tableau de bytes nécessaire
+        int totalSize = V.length * V[0].length* Byte.SIZE;
+        byte[] result = new byte[totalSize];
+
+        int currentIndex = 0;
+        // Convertir chaque élément de la matrice en bytes
+        for (int i = 0; i < V.length; i++) {
+            for (int j = 0; j < V[0].length; j++) {
+                BigInteger currentElement = V[i][j];
+                byte[] elementBytes = currentElement.toByteArray();
+
+                // Copier les bytes dans le tableau de résultat
+                System.arraycopy(elementBytes, 0, result, currentIndex, elementBytes.length);
+                currentIndex += elementBytes.length;
+            }
+        }
+        return result;
+    }
+    public static byte[] paramAtoBytes(BigInteger[] paramA){
+        // Taille totale du tableau de bytes nécessaire
+        int totalSize = paramA.length * Byte.SIZE;
+        byte[] result = new byte[totalSize];
+
+        int currentIndex = 0;
+        // Convertir chaque élément du tableau en bytes
+        for (BigInteger currentElement : paramA) {
+            byte[] elementBytes = currentElement.toByteArray();
+
+            // Copier les bytes dans le tableau de résultat
+            System.arraycopy(elementBytes, 0, result, currentIndex, elementBytes.length);
+            currentIndex += elementBytes.length;
+        }
+        return result;
     }
 
     // Data deletion

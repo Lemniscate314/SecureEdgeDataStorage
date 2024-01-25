@@ -19,10 +19,10 @@ public class SISTest {
 
         // Initialize EndUserSIS with lambda and N
         int lambda = 256; // Example lambda value
-        int N = 3;       // Example number of Block blocks
+        int N = 3;       // Example number of Blocks blocks
         EndUserSIS dmc = new EndUserSIS(lambda, N);
 
-        // Prepare Block blocks for testing
+        // Prepare Blocks blocks for testing
         String[] dataBlocks = new String[N];
         for (int i = 0; i < N; i++) {
             dataBlocks[i] = "DataManipulation block " + (i + 1);

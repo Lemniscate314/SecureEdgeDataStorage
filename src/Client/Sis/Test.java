@@ -41,7 +41,7 @@ public class Test {
         BigInteger[][] matrix = new BigInteger[rows][cols];
         for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
-                matrix[i][j] = BigInteger.valueOf(i * 10 + j);  // Replace with actual Block
+                matrix[i][j] = BigInteger.valueOf(i * 10 + j);  // Replace with actual Blocks
             }
         }
         return matrix;

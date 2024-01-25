@@ -19,17 +19,17 @@ public class EndUserSIS {
         }
         return matrixA;
     }
-    // Constructs the matrix X by hashing each Block block and filling the vectors xi. N is m*N
+    // Constructs the matrix X by hashing each Blocks block and filling the vectors xi. N is m*N
     public static BigInteger[][] constructMatrixX(EndUser endUser, int N, String[] dataBlocks) {
         if (dataBlocks.length != N) {
-            throw new IllegalArgumentException("Number of Block blocks should be equal to N");
+            throw new IllegalArgumentException("Number of Blocks blocks should be equal to N");
         }
 
         BigInteger[][] X = new BigInteger[endUser.m][N];
 
         for (int i = 0; i < endUser.m; i++) {
             for (int j = 0; j < N; j++) {
-                byte[] hash = FunctionsFromServer.hashFunctionH3(dataBlocks[j]); // Hashing each Block block
+                byte[] hash = FunctionsFromServer.hashFunctionH3(dataBlocks[j]); // Hashing each Blocks block
 
                 // Calculate the starting index for each injection
                 int bitIndex = i % endUser.lambda;

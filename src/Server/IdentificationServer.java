@@ -80,6 +80,7 @@ public class IdentificationServer {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+            System.out.println("Loading successful");
         }
         else{
             System.out.println("On genere de nouveaux paramètres publics.");
