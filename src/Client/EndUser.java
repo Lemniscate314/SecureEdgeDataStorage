@@ -162,7 +162,7 @@ public class EndUser {
             prop.store(new FileOutputStream(configFilePath), null);
             //On instancie maintenant nos attributs
             this.Sw = G0.newElementFromBytes(Base64.decode(prop.getProperty("Sw")));
-            this.PK = G0.newElementFromBytes(Base64.decode(prop.getProperty("SPK")));
+            this.PK = G0.newElementFromBytes(Base64.decode(prop.getProperty("PK")));
             this.P = G0.newElementFromBytes(Base64.decode(prop.getProperty("P")));
             this.l = Integer.parseInt(prop.getProperty("l"));
             this.m = Integer.parseInt(prop.getProperty("m"));
