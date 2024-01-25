@@ -29,7 +29,7 @@ public class EndUserIBS {
         boolean bool = false;
 
         // On construit le vecteur xi
-        BigInteger[][] X = EndUserSIS.constructMatrixX(endUser, blocks.V.length, blocks.dataBlocks);
+        BigInteger[][] X = EndUserSIS.computeMatrixX(endUser, blocks.V.length, blocks.dataBlocks);
         // On reconstrut la matrice A à partir des paramA reçus
         BigInteger[][] A = EndUserSIS.computeMatrixA(endUser, blocks.paramA);
 

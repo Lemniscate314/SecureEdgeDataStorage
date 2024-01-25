@@ -3,7 +3,6 @@ package Client;
 import com.google.gson.Gson;
 import java.math.BigInteger;
 import java.util.HashMap;
-import java.util.Set;
 
 public class Blocks {
     protected int dataID;
@@ -25,7 +24,7 @@ public class Blocks {
         this.dataBlocks = dataBlocks;
         this.paramA = block.paramA;
         V = block.V;
-        this.signature = block.signature;
+        this.signature = IBSsignature.fromStringArray(block.signature);
     }
 
     //Generate Blocks from JSON
@@ -40,17 +39,18 @@ public class Blocks {
         blocks.topic = topic;
         blocks.IDw = endUser.ID;
         blocks.dataBlocks = splitStringIntoN(data, N);
-        BigInteger[][] X = EndUserSIS.constructMatrixX(endUser, N, blocks.dataBlocks);
+        BigInteger[][] X = EndUserSIS.computeMatrixX(endUser, N, blocks.dataBlocks);
         blocks.paramA = endUser.paramA;
         BigInteger[][] A = EndUserSIS.computeMatrixA(endUser, blocks.paramA);
         blocks.V = EndUserSIS.computeMatrixV(endUser, N, A, X);
         blocks.signature = EndUserIBS.IBS_signature_generation(endUser, blocks);
 
-        HashMap<String, Integer> resultMap = new HashMap<>();
+        blocks.dataBlocksMap = new HashMap<>();
         // Stocke chaque sous-chaîne dans le HashMap avec sa position comme valeur
         for (int i = 0; i < N; i++) {
-            resultMap.put(blocks.dataBlocks[i], i); // La position commence à 0
+            blocks.dataBlocksMap.put(blocks.dataBlocks[i], i); // La position commence à 0
         }
+
         return blocks;
     }
 
@@ -70,6 +70,13 @@ public class Blocks {
             result[i] = inputString.substring(startIndex, endIndex);
         }
         return result;
+    }
+
+    public static void printStringArray(String[] array) {
+        for (String element : array) {
+            System.out.println(element);
+        }
+        System.out.println();
     }
 
     //Parse JSON to generate Blocks
@@ -107,28 +114,6 @@ public class Blocks {
         return finalJson;
     }
 
-    // Classe représentant un bloc et utilisé pour manipuler les JSON
-    static class Block {
-        protected int dataID;
-        protected String topic;
-        protected String IDw;
-        protected int i; //place du block dans la donnée
-        protected String dataBlock;
-        protected BigInteger[] paramA;
-        protected BigInteger[][] V;
-        protected IBSsignature signature;
-        public Block(Blocks blocks, String dataBlock) {
-            this.dataID = blocks.dataID;
-            this.topic = blocks.topic;
-            this.IDw = blocks.IDw;
-            this.dataBlock = dataBlock;
-            this.i = blocks.dataBlocksMap.get(dataBlock);
-            this.paramA = blocks.paramA;
-            this.V = blocks.V;
-            this.signature = blocks.signature;
-        }
-    }
-
     public static byte[] VtoBytes(BigInteger[][] V){
 
         // Taille totale du tableau de bytes nécessaire
@@ -150,19 +135,20 @@ public class Blocks {
         return result;
     }
     public static byte[] paramAtoBytes(BigInteger[] paramA){
-        // Taille totale du tableau de bytes nécessaire
-        int totalSize = paramA.length * Byte.SIZE;
-        byte[] result = new byte[totalSize];
+        byte[] array1 = paramA[0].toByteArray();
+        byte[] array2 = paramA[0].toByteArray();
+        byte[] array3 = paramA[0].toByteArray();
+        // Calcul de la taille totale du nouveau tableau
+        int totalLength = array1.length + array2.length + array3.length;
 
-        int currentIndex = 0;
-        // Convertir chaque élément du tableau en bytes
-        for (BigInteger currentElement : paramA) {
-            byte[] elementBytes = currentElement.toByteArray();
+        // Création du nouveau tableau
+        byte[] result = new byte[totalLength];
 
-            // Copier les bytes dans le tableau de résultat
-            System.arraycopy(elementBytes, 0, result, currentIndex, elementBytes.length);
-            currentIndex += elementBytes.length;
-        }
+        // Copie des trois tableaux dans le nouveau tableau
+        System.arraycopy(array1, 0, result, 0, array1.length);
+        System.arraycopy(array2, 0, result, array1.length, array2.length);
+        System.arraycopy(array3, 0, result, array1.length + array2.length, array3.length);
+
         return result;
     }
 
@@ -203,7 +189,7 @@ public class Blocks {
         // Step 1: Construct a new vector x'i using the new block D'i
         this.addBlockAtEnd(newBlock);
 
-        BigInteger[][] newX = EndUserSIS.constructMatrixX(endUser, this.dataBlocks.length, this.dataBlocks);
+        BigInteger[][] newX = EndUserSIS.computeMatrixX(endUser, this.dataBlocks.length, this.dataBlocks);
 
         // Extract the first column of newX
         for (int row = 0; row < newX.length; row++) {
@@ -227,7 +213,7 @@ public class Blocks {
         if (!checkPrivilege(endUser)){return false;}
         // Step 1: Construct a new vector x'i using the new block D'i
         this.addBlockAtEnd(newDataBlock);
-        X[i] = EndUserSIS.constructMatrixX(endUser, this.dataBlocks.length, this.dataBlocks)[0];
+        X[i] = EndUserSIS.computeMatrixX(endUser, this.dataBlocks.length, this.dataBlocks)[0];
 
         // Step 2: Compute the vector v'i = A * x'i mod q using computeMatrixV
         BigInteger[][] A = EndUserSIS.computeMatrixA(endUser, paramA);

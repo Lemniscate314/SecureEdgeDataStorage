@@ -11,7 +11,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.math.BigInteger;
-import java.nio.ByteBuffer;
 import java.security.SecureRandom;
 import java.util.Properties;
 
@@ -39,6 +38,7 @@ public class EndUser {
     protected BigInteger In; // Current value of I
     protected BigInteger Cn; // Current value of C
     protected static String configFilePath = "src/Client/UserParameters.properties";
+    protected static String configFilePathParamA = "src/Client/paramA.properties";
     protected boolean loadingSuccessful; //Attribut permettant de determiner si une requete au server est necessaire
 
     public EndUser(String email) {
@@ -52,12 +52,12 @@ public class EndUser {
 
     // Fonction qui load les paramètres de la matrice A depuis le fichier configFilePath
     // Si le fichier est vide alors elle génère de nouveau paramA
-    protected boolean load_ParamA() {
+    protected void load_ParamA() {
         // Fichier de configuration pour stocker la clé secrète
         Properties prop = new Properties();
         InputStream in;
         try {
-            in = new FileInputStream(configFilePath);
+            in = new FileInputStream(configFilePathParamA);
             prop.load(in);
         } catch (IOException e) {
             e.printStackTrace();
@@ -75,12 +75,11 @@ public class EndUser {
             } catch (NumberFormatException e) {
                 e.printStackTrace();
             }
-            System.out.println("Loading successful");
-            return true;
+            System.out.println("Loading paramA successful");
         }
         else {
             System.out.println("Nouveaux Paramètres pour la matrice A.");
-            return false;
+            new_ParamA();
         }
     }
 
@@ -98,7 +97,7 @@ public class EndUser {
             prop.setProperty("I0", this.I0.toString());
             prop.setProperty("a", this.a.toString());
             prop.setProperty("C0", this.C0.toString());
-            prop.store(new FileOutputStream(configFilePath), null);
+            prop.store(new FileOutputStream(configFilePathParamA), null);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -138,7 +137,7 @@ public class EndUser {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            System.out.println("Loading successful");
+            System.out.println("Loading Public Parameters and private key successful");
             return true;
         }
         else {

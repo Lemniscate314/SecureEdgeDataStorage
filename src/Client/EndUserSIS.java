@@ -4,8 +4,6 @@ import org.apache.commons.math3.linear.BlockRealMatrix;
 import org.apache.commons.math3.linear.RealMatrix;
 
 import java.math.BigInteger;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 
 public class EndUserSIS {
     public static BigInteger[][] computeMatrixA(EndUser endUser, BigInteger[] paramA) {
@@ -19,8 +17,9 @@ public class EndUserSIS {
         }
         return matrixA;
     }
+
     // Constructs the matrix X by hashing each Blocks block and filling the vectors xi. N is m*N
-    public static BigInteger[][] constructMatrixX(EndUser endUser, int N, String[] dataBlocks) {
+    public static BigInteger[][] computeMatrixX(EndUser endUser, int N, String[] dataBlocks) {
         if (dataBlocks.length != N) {
             throw new IllegalArgumentException("Number of Blocks blocks should be equal to N");
         }
@@ -74,6 +73,16 @@ public class EndUserSIS {
 
         }
         return V;
+    }
+
+    public static void printMatrix(BigInteger[][] matrix) {
+        for (BigInteger[] row : matrix) {
+            for (BigInteger val : row) {
+                System.out.print(val + " ");
+            }
+            System.out.println();
+        }
+        System.out.println();
     }
 
 }

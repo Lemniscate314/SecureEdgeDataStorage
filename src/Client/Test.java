@@ -30,10 +30,24 @@ public class Test {
         int dataID = 1;
         String topic = "meteo";
         int decoupage = 3;
+
+        System.out.println("Chaine decoupee:");
+        Blocks.printStringArray(Blocks.splitStringIntoN(data, decoupage));
+
         Blocks blocks = Blocks.newData(endUser, dataID, topic, data, decoupage);
+
+        System.out.println("Matrice A:");
+        EndUserSIS.printMatrix(EndUserSIS.computeMatrixA(endUser, blocks.paramA));
+
+        System.out.println("Matrice X:");
+        EndUserSIS.printMatrix(EndUserSIS.computeMatrixX(endUser, decoupage, blocks.dataBlocks));
+
+        System.out.println("Matrice V:");
+        EndUserSIS.printMatrix(blocks.V);
 
         //On ajoute une nouvelle video dans le FOG
         String JSON = blocks.toJson();
+        System.out.println(JSON);
     }
  /**
     public static void main(String[] args) {
