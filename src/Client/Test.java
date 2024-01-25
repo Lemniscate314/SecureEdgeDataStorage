@@ -47,8 +47,21 @@ public class Test {
 
         //On ajoute une nouvelle video dans le FOG
         String JSON = blocks.toJson();
-        System.out.println(JSON);
-    }
+
+        //Recuperation d'un JSON pour le parser en Blocks
+        Blocks blocksRecieve = Blocks.fromJson(JSON);
+        System.out.println("Matrice A:");
+        EndUserSIS.printMatrix(EndUserSIS.computeMatrixA(endUser, blocksRecieve.paramA));
+
+        System.out.println("Matrice X:");
+        EndUserSIS.printMatrix(EndUserSIS.computeMatrixX(endUser, decoupage, blocksRecieve.dataBlocks));
+
+        System.out.println("Matrice V:");
+        EndUserSIS.printMatrix(blocksRecieve.V);
+
+        //Je vérifie l'intégrité
+        EndUserIBS.IBS_signature_verification(endUser, blocksRecieve);
+        };
  /**
     public static void main(String[] args) {
         // Example setup

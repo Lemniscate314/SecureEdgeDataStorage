@@ -27,11 +27,6 @@ public class Blocks {
         this.signature = IBSsignature.fromStringArray(block.signature);
     }
 
-    //Generate Blocks from JSON
-    public Blocks(String json) {
-        fromJson(json);
-    }
-
     //Fonction permettant de créer une nouvelle data
     public static Blocks newData(EndUser endUser, int dataID, String topic, String data, int N) {
         Blocks blocks = new Blocks();
@@ -86,6 +81,7 @@ public class Blocks {
 
         // Diviser la chaîne JSON en sous-chaînes représentant chaque bloc individuel
         String[] blockJsonArray = json.split("\n");
+        Blocks.printStringArray(blockJsonArray);
         Block[] blockArray = new Block[blockJsonArray.length];
         HashMap<String, Integer> dataBlocksMap = new HashMap<>();
         String[] dataBlocks = new String[blockJsonArray.length];
@@ -110,6 +106,7 @@ public class Blocks {
 
         // Résultat final contenant les JSON concaténés
         String finalJson = jsonBuilder.toString();
+        System.out.println("JSON produit:");
         System.out.println(finalJson);
         return finalJson;
     }

@@ -29,16 +29,20 @@ public class EndUserIBS {
         boolean bool = false;
 
         // On construit le vecteur xi
-        BigInteger[][] X = EndUserSIS.computeMatrixX(endUser, blocks.V.length, blocks.dataBlocks);
+        BigInteger[][] X = EndUserSIS.computeMatrixX(endUser, blocks.V[0].length, blocks.dataBlocks);
         // On reconstrut la matrice A à partir des paramA reçus
         BigInteger[][] A = EndUserSIS.computeMatrixA(endUser, blocks.paramA);
 
         // On construit la matrice V' que l'on complète avec V
-        BigInteger[][] W = EndUserSIS.computeMatrixV(endUser, blocks.V.length, A, X);
+        BigInteger[][] W = EndUserSIS.computeMatrixV(endUser, blocks.V[0].length, A, X);
+        System.out.println("Matrice W:");
+        EndUserSIS.printMatrix(W);
         BigInteger[][] Vprime = blocks.V;
+        System.out.println("Matrice V':");
+        EndUserSIS.printMatrix(Vprime);
         for (int i = 0; i < Vprime.length; i++) {
             int index = blocks.dataBlocksMap.get(blocks.dataBlocks[i]).intValue();
-            for (int j = 0; j < Vprime[0].length; i++) {
+            for (int j = 0; j < Vprime[0].length; j++) {
                 if (index == j) {
                     Vprime[i][j] = W[i][j];
                 }
@@ -49,12 +53,15 @@ public class EndUserIBS {
         // On applique la fonction de hachage H1 à l'ID
         Element Qid = G0.newElementFromHash(IDbytes, 0, IDbytes.length);
 
-        Element rprime = pairing.pairing(blocks.signature.getW2(), endUser.P)
-                .mul(pairing.pairing(Qid, endUser.PK.duplicate().negate()).mulZn(blocks.signature.getW1()));
+        Element rprime1 = pairing.pairing(blocks.signature.getW2(), endUser.P);
+        Element rprime2 = pairing.pairing(Qid, endUser.PK.duplicate().negate()).mulZn(blocks.signature.getW1());
+        Element rprime = rprime1.duplicate().mul(rprime2.duplicate());
 
         //On concatene V paramA et rprime
         byte[] concatenation = concatenateByteArrays(Blocks.VtoBytes(Vprime), Blocks.paramAtoBytes(blocks.paramA), rprime.toBytes());
         bool = blocks.signature.getW1().isEqual(Zp.newElementFromHash(concatenation, 0, concatenation.length));
+        if (bool == true){System.out.println("Signature correct");}
+        else{System.out.println("Problème d'intégrité");}
         return bool;
     }
 
