@@ -66,7 +66,6 @@
       </library>
     </orderEntry>
     <orderEntry type="library" name="google.code.gson" level="application" />
-    <orderEntry type="library" name="springframework.boot.spring" level="application" />
     <orderEntry type="library" name="Maven: org.springframework.boot:spring-boot-starter-web:2.6.2" level="project" />
     <orderEntry type="library" name="Maven: org.springframework.boot:spring-boot-starter:2.6.2" level="project" />
     <orderEntry type="library" name="Maven: org.springframework.boot:spring-boot:2.6.2" level="project" />

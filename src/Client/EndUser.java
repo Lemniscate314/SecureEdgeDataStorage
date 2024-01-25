@@ -15,8 +15,7 @@ import java.nio.ByteBuffer;
 import java.security.SecureRandom;
 import java.util.Properties;
 
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.client.RestTemplate;
+import com.google.gson.Gson;
 
 
 public class EndUser {
@@ -39,7 +38,7 @@ public class EndUser {
     protected BigInteger[] paramA; //parameters to regenerate A
     protected BigInteger In; // Current value of I
     protected BigInteger Cn; // Current value of C
-    protected static String configFilePath = "src/Cryptography/IBS/UserParameters.properties";
+    protected static String configFilePath = "src/Client/UserParameters.properties";
     protected boolean loadingSuccessful; //Attribut permettant de determiner si une requete au server est necessaire
 
     public EndUser(String email) {
@@ -66,12 +65,14 @@ public class EndUser {
         String chaine1 = prop.getProperty("I0");
         String chaine2 = prop.getProperty("a");
         String chaine3 = prop.getProperty("C0");
-        if (chaine1.length() != 0 && chaine2.length() != 0 && chaine3.length() != 0 ) {// La clé existe et est stocké dans le fichier
+        if (chaine1 != null && !chaine1.isEmpty() &&
+                chaine2 != null && !chaine2.isEmpty() &&
+                chaine3 != null && !chaine3.isEmpty()) {// La clé existe et est stocké dans le fichier
             try {
-                this.I0 = new BigInteger(Base64.decode(chaine1));
-                this.a = new BigInteger(Base64.decode(chaine2));
-                this.C0 = new BigInteger(Base64.decode(chaine3));
-            } catch (IOException e) {
+                this.I0 = new BigInteger(chaine1);
+                this.a = new BigInteger(chaine2);
+                this.C0 = new BigInteger(chaine3);
+            } catch (NumberFormatException e) {
                 e.printStackTrace();
             }
             System.out.println("Loading successful");
@@ -94,9 +95,9 @@ public class EndUser {
         //this.I=Public_Parameters_Sw[6];
         try {
             // On convertit les Elements en string
-            prop.setProperty("I0", Base64.encodeBytes(this.I0.toByteArray()));
-            prop.setProperty("a", Base64.encodeBytes(this.a.toByteArray()));
-            prop.setProperty("C0", Base64.encodeBytes(this.C0.toByteArray()));
+            prop.setProperty("I0", this.I0.toString());
+            prop.setProperty("a", this.a.toString());
+            prop.setProperty("C0", this.C0.toString());
             prop.store(new FileOutputStream(configFilePath), null);
         } catch (IOException e) {
             e.printStackTrace();
@@ -121,14 +122,19 @@ public class EndUser {
         String chaine4 = prop.getProperty("l");
         String chaine5 = prop.getProperty("m");
         String chaine6 = prop.getProperty("q");
-        if (chaine1.length() != 0 && chaine2.length() != 0 && chaine3.length() != 0 && chaine4.length() != 0 && chaine5.length() != 0 && chaine6.length() != 0) {// La clé existe et est stocké dans le fichier
+        if (chaine1 != null && !chaine1.isEmpty() &&
+                chaine2 != null && !chaine2.isEmpty() &&
+                chaine3 != null && !chaine3.isEmpty() &&
+                chaine4 != null && !chaine4.isEmpty() &&
+                chaine5 != null && !chaine5.isEmpty() &&
+                chaine6 != null && !chaine6.isEmpty()) {// La clé existe et est stocké dans le fichier
             try {
                 this.Sw = G0.newElementFromBytes(Base64.decode(chaine1));
                 this.PK = G0.newElementFromBytes(Base64.decode(chaine2));
                 this.P = G0.newElementFromBytes(Base64.decode(chaine3));
-                this.l = ByteBuffer.wrap(Base64.decode(chaine4)).getInt();
-                this.m = ByteBuffer.wrap(Base64.decode(chaine5)).getInt();
-                this.q = new BigInteger(Base64.decode(chaine6));
+                this.l = Integer.parseInt(chaine4);
+                this.m = Integer.parseInt(chaine5);
+                this.q = new BigInteger(chaine6);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -142,48 +148,37 @@ public class EndUser {
     }
 
     // Fonction qui récupère les paramètres publics et gère l'écriture dans un fichier
-    public void new_Public_Parameters_Sw(Object[] Public_Parameters_Sw) {
-        if (Public_Parameters_Sw.length==6){
+    public void get_Public_Parameters_Sw(String publicParametersJson) {
+        Gson gson = new Gson();
+        PropertiesObject propertiesObject = gson.fromJson(publicParametersJson, PropertiesObject.class);
+        try { //On stocke les parametres dans le fichier
             Properties prop = new Properties();
-            this.Sw = (Element) Public_Parameters_Sw[0];
-            this.P = (Element) Public_Parameters_Sw[1];
-            this.PK = (Element) Public_Parameters_Sw[2];
-            this.l = (int) Public_Parameters_Sw[3];
-            this.m = (int) Public_Parameters_Sw[4];
-            this.q = (BigInteger) Public_Parameters_Sw[5];
-            //generateur de nombre pseud-aléatoire
-            //this.I=Public_Parameters_Sw[6];
-            try {
-                // On convertit les Elements en string
-                prop.setProperty("Sw", Base64.encodeBytes(this.Sw.toBytes()));
-                prop.setProperty("P", Base64.encodeBytes(this.P.toBytes()));
-                prop.setProperty("PK", Base64.encodeBytes(this.PK.toBytes()));
-                prop.setProperty("l", Base64.encodeBytes(ByteBuffer.allocate(Integer.BYTES).putInt(this.l).array()));
-                prop.setProperty("m", Base64.encodeBytes(ByteBuffer.allocate(Integer.BYTES).putInt(this.m).array()));
-                prop.setProperty("q", Base64.encodeBytes(this.q.toByteArray()));
-                prop.store(new FileOutputStream(configFilePath), null);
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            prop.setProperty("Sw", propertiesObject.Sw);
+            prop.setProperty("P", propertiesObject.P);
+            prop.setProperty("PK", propertiesObject.PK);
+            prop.setProperty("l", propertiesObject.l);
+            prop.setProperty("m", propertiesObject.m);
+            prop.setProperty("q", propertiesObject.q);
+            prop.store(new FileOutputStream(configFilePath), null);
+            //On instancie maintenant nos attributs
+            this.Sw = G0.newElementFromBytes(Base64.decode(prop.getProperty("Sw")));
+            this.PK = G0.newElementFromBytes(Base64.decode(prop.getProperty("SPK")));
+            this.P = G0.newElementFromBytes(Base64.decode(prop.getProperty("P")));
+            this.l = Integer.parseInt(prop.getProperty("l"));
+            this.m = Integer.parseInt(prop.getProperty("m"));
+            this.q = new BigInteger(prop.getProperty("q"));
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        else{System.out.println("Erreur du nombres de parametres publics");}
+        System.out.println("Successfully receive parameters from Server");
     }
-
-    public static void main(String[] args) {
-        String mail= "antoine@gmail.com";
-        EndUser endUser = new EndUser(mail);
-        if (endUser.loadingSuccessful==false) { //On requete le serveur puisque le le loading a echoue
-            String serverUrl = "http://localhost:80/api/getPublicParameters?id=" + endUser.ID;
-
-            // Use RestTemplate to make a GET request to the server
-            RestTemplate restTemplate = new RestTemplate();
-            ResponseEntity<Object[]> response = restTemplate.getForEntity(serverUrl, Object[].class);
-
-            // Extract the public parameters from the response
-            Object[] publicParameters = response.getBody();
-
-            // Use the public parameters as needed
-            // ...
-        }
+    // Classe pour stocker les paramètres du fichier .properties et la clé privé d'un EndUser
+    static class PropertiesObject {
+        String P;
+        String PK;
+        String l;
+        String m;
+        String q;
+        String Sw;
     }
 }

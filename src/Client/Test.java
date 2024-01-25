@@ -1,11 +1,33 @@
-package Client.Sis;
 
-import Client.EndUserSIS;
+package Client;
+
+
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestTemplate;
 
 import java.math.BigInteger;
 
 public class Test {
+    public static void main(String[] args) {
+        String mail= "antoine@gmail.com";
+        EndUser endUser = new EndUser(mail);
+        if (endUser.loadingSuccessful==false) { //On requete le serveur puisque le le loading a echoue
+            String serverUrl = "http://localhost:8080/api/getPublicParameters?id=" + endUser.ID;
 
+            // Use RestTemplate to make a GET request to the server
+            RestTemplate restTemplate = new RestTemplate();
+            ResponseEntity<String> response = restTemplate.getForEntity(serverUrl, String.class);
+
+            // Extract the public parameters from the response and give them to endUser
+            String publicParameters = response.getBody();
+            System.out.println("Server Response: " + publicParameters);
+            endUser.get_Public_Parameters_Sw(publicParameters);
+
+            // Use the public parameters as needed
+            // ...
+        }
+    }
+ /**
     public static void main(String[] args) {
         // Example setup
         int l = 3;
@@ -15,24 +37,24 @@ public class Test {
         BigInteger q = BigInteger.valueOf(17);  // Replace with your actual q value
 
         // Create instances of EndUserSIS and DataManipulation
-        EndUserSIS endUserSIS = new EndUserSIS(N);
-        Data data= new Data(l, N, A, q, endUserSIS);
+        EndUser endUser = new EndUser("antoine@gmail.com");
+        Blocks blocks= new Blocks();
 
         // Test deleteBlock
         BigInteger[][] VDelete = generateSampleMatrix(l, N);  // Replace with actual dataManipulation
-        data.deleteBlock(2, VDelete);
+        blocks.deleteBlock(endUser,2, VDelete);
         printMatrix("VDelete", VDelete);
 
         // Test updateBlock
         BigInteger[][] XUpdate = generateSampleMatrix(m, 1);  // Replace with actual dataManipulation
         BigInteger[][] VUpdate = generateSampleMatrix(l, N);  // Replace with actual dataManipulation
-        data.updateBlock(1, XUpdate, VUpdate, "newBlock");
+        blocks.updateBlock(1, XUpdate, VUpdate, "newBlock");
         printMatrix("VUpdate", VUpdate);
 
         // Test insertBlock
         BigInteger[][] XInsert = generateSampleMatrix(m, 1);  // Replace with actual dataManipulation
         BigInteger[][] VInsert = generateSampleMatrix(l, N);  // Replace with actual dataManipulation
-        data.insertBlock(3, XInsert, VInsert, "newDataBlock");
+        blocks.insertBlock(3, XInsert, VInsert, "newDataBlock");
         printMatrix("VInsert", VInsert);
     }
 
@@ -58,4 +80,5 @@ public class Test {
         }
         System.out.println();
     }
+  **/
 }
