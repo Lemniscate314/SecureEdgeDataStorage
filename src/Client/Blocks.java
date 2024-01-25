@@ -7,6 +7,7 @@ import java.util.Set;
 
 public class Blocks {
     protected int dataID;
+    protected String topic;
     protected String IDw;
     protected HashMap<String, Integer> dataBlocksMap; // HashMap pour stocker le block avec son numero dans la data
     protected String[] dataBlocks;
@@ -14,20 +15,120 @@ public class Blocks {
     protected BigInteger[][] V;
     protected IBSsignature signature;
 
-    public Blocks() {
-        // Récupérer toutes les clés du HashMap et les stocker dans dataBlocks
-        Set<String> keys = dataBlocksMap.keySet();
-        this.dataBlocks = keys.toArray(new String[0]);
+    public Blocks() {}
+
+    public Blocks(Block block, String[] dataBlocks, HashMap<String, Integer> dataBlocksMap) {
+        this.dataID = block.dataID;
+        this.topic = block.topic;
+        this.IDw = block.IDw;
+        this.dataBlocksMap = dataBlocksMap;
+        this.dataBlocks = dataBlocks;
+        this.paramA = block.paramA;
+        V = block.V;
+        this.signature = block.signature;
     }
 
-    //load class form Json
-    public static Blocks fromJson(String json) {
-        return new Gson().fromJson(json, Blocks.class);
+    //Generate Blocks from JSON
+    public Blocks(String json) {
+        fromJson(json);
     }
+
+    //Fonction permettant de créer une nouvelle data
+    public static Blocks newData(EndUser endUser, int dataID, String topic, String data, int N) {
+        Blocks blocks = new Blocks();
+        blocks.dataID = dataID;
+        blocks.topic = topic;
+        blocks.IDw = endUser.ID;
+        blocks.dataBlocks = splitStringIntoN(data, N);
+        BigInteger[][] X = EndUserSIS.constructMatrixX(endUser, N, blocks.dataBlocks);
+        blocks.paramA = endUser.paramA;
+        BigInteger[][] A = EndUserSIS.computeMatrixA(endUser, blocks.paramA);
+        blocks.V = EndUserSIS.computeMatrixV(endUser, N, A, X);
+        blocks.signature = EndUserIBS.IBS_signature_generation(endUser, blocks);
+
+        HashMap<String, Integer> resultMap = new HashMap<>();
+        // Stocke chaque sous-chaîne dans le HashMap avec sa position comme valeur
+        for (int i = 0; i < N; i++) {
+            resultMap.put(blocks.dataBlocks[i], i); // La position commence à 0
+        }
+        return blocks;
+    }
+
+    public static String[] splitStringIntoN(String inputString, int N) {
+        // Vérification que la chaîne d'entrée n'est pas nulle ou vide et que N est positif
+        if (inputString == null || inputString.isEmpty() || N <= 0) {
+            return new String[0]; // Retourne un tableau vide si la chaîne est invalide ou si N est négatif
+        }
+        int length = inputString.length();
+        int chunkSize = length / N; // Taille de chaque morceau de la chaîne
+
+        String[] result = new String[N];
+        // Découpe la chaîne en morceaux de taille chunkSize et les stocke dans le tableau de résultats
+        for (int i = 0; i < N; i++) {
+            int startIndex = i * chunkSize;
+            int endIndex = (i + 1) * chunkSize;
+            result[i] = inputString.substring(startIndex, endIndex);
+        }
+        return result;
+    }
+
+    //Parse JSON to generate Blocks
+    public static Blocks fromJson(String json) {
+        Gson gson = new Gson();
+        Blocks blocks = new Blocks();
+
+        // Diviser la chaîne JSON en sous-chaînes représentant chaque bloc individuel
+        String[] blockJsonArray = json.split("\n");
+        Block[] blockArray = new Block[blockJsonArray.length];
+        HashMap<String, Integer> dataBlocksMap = new HashMap<>();
+        String[] dataBlocks = new String[blockJsonArray.length];
+        // Pour chaque sous-chaîne JSON, désérialiser en un objet Block et l'ajouter à la liste de blocs
+        for (int i =0; i<blockJsonArray.length; i++) {
+            blockArray[i] = gson.fromJson(blockJsonArray[i], Block.class);
+            dataBlocksMap.put(blockArray[i].dataBlock, blockArray[i].i);
+            dataBlocks[i] = blockArray[i].dataBlock;
+        }
+        return new Blocks(blockArray[0], dataBlocks, dataBlocksMap);
+    }
+
     //write class to Json
     public String toJson() {
-        return new Gson().toJson(this);
+        // Convertir chaque objet Blocks plusiseurs objets Block concaténé dans un JSON
+        Gson gson = new Gson();
+        StringBuilder jsonBuilder = new StringBuilder();
+        for (String dataBlock : this.dataBlocks) {
+            String json = gson.toJson(new Block(this, dataBlock));
+            jsonBuilder.append(json).append("\n"); // Ajouter un saut de ligne entre chaque JSON
+        }
+
+        // Résultat final contenant les JSON concaténés
+        String finalJson = jsonBuilder.toString();
+        System.out.println(finalJson);
+        return finalJson;
     }
+
+    // Classe représentant un bloc et utilisé pour manipuler les JSON
+    static class Block {
+        protected int dataID;
+        protected String topic;
+        protected String IDw;
+        protected int i; //place du block dans la donnée
+        protected String dataBlock;
+        protected BigInteger[] paramA;
+        protected BigInteger[][] V;
+        protected IBSsignature signature;
+        public Block(Blocks blocks, String dataBlock) {
+            this.dataID = blocks.dataID;
+            this.topic = blocks.topic;
+            this.IDw = blocks.IDw;
+            this.dataBlock = dataBlock;
+            this.i = blocks.dataBlocksMap.get(dataBlock);
+            this.paramA = blocks.paramA;
+            this.V = blocks.V;
+            this.signature = blocks.signature;
+        }
+    }
+
     public static byte[] VtoBytes(BigInteger[][] V){
 
         // Taille totale du tableau de bytes nécessaire

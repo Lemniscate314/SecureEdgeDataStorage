@@ -9,6 +9,7 @@ import java.math.BigInteger;
 
 public class Test {
     public static void main(String[] args) {
+        // On commence par definir un EndUser avec une adresse mail
         String mail= "antoine@gmail.com";
         EndUser endUser = new EndUser(mail);
         if (endUser.loadingSuccessful==false) { //On requete le serveur puisque le le loading a echoue
@@ -22,10 +23,17 @@ public class Test {
             String publicParameters = response.getBody();
             System.out.println("Server Response: " + publicParameters);
             endUser.get_Public_Parameters_Sw(publicParameters);
-
-            // Use the public parameters as needed
-            // ...
         }
+
+        //On cree une nouvelle donnee
+        String data = "Il fait beau.";
+        int dataID = 1;
+        String topic = "meteo";
+        int decoupage = 3;
+        Blocks blocks = Blocks.newData(endUser, dataID, topic, data, decoupage);
+
+        //On ajoute une nouvelle video dans le FOG
+        String JSON = blocks.toJson();
     }
  /**
     public static void main(String[] args) {
