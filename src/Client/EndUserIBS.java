@@ -28,19 +28,20 @@ public class EndUserIBS {
     public static boolean IBS_signature_verification(EndUser endUser, Blocks blocks) {
         boolean bool = false;
 
-        String [] D = new String [1];
-        D[0] = blocks.Di;
         // On construit le vecteur xi
-        BigInteger[][] X = EndUserSIS.constructMatrixX(endUser, blocks.V.length, D);
+        BigInteger[][] X = EndUserSIS.constructMatrixX(endUser, blocks.V.length, blocks.dataBlocks);
         // On reconstrut la matrice A à partir des paramA reçus
         BigInteger[][] A = EndUserSIS.computeMatrixA(endUser, blocks.paramA);
 
         // On construit la matrice V' que l'on complète avec V
         BigInteger[][] W = EndUserSIS.computeMatrixV(endUser, blocks.V.length, A, X);
         BigInteger[][] Vprime = blocks.V;
-        for (int i = 0; i < Vprime[blocks.i].length; i++) {
-            if (blocks.i==i) {
-                Vprime[blocks.i][i] = W[0][i];
+        for (int i = 0; i < Vprime.length; i++) {
+            int index = blocks.dataBlocksMap.get(blocks.dataBlocks[i]).intValue();
+            for (int j = 0; j < Vprime[0].length; i++) {
+                if (index == j) {
+                    Vprime[i][j] = W[i][j];
+                }
             }
         }
 

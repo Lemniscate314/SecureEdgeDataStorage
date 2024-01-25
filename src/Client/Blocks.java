@@ -2,16 +2,23 @@ package Client;
 
 import com.google.gson.Gson;
 import java.math.BigInteger;
+import java.util.HashMap;
+import java.util.Set;
 
 public class Blocks {
     protected int dataID;
     protected String IDw;
-    protected int i;
-    protected String Di;
+    protected HashMap<String, Integer> dataBlocksMap; // HashMap pour stocker le block avec son numero dans la data
+    protected String[] dataBlocks;
     protected BigInteger[] paramA;
     protected BigInteger[][] V;
     protected IBSsignature signature;
 
+    public Blocks() {
+        // Récupérer toutes les clés du HashMap et les stocker dans dataBlocks
+        Set<String> keys = dataBlocksMap.keySet();
+        this.dataBlocks = keys.toArray(new String[0]);
+    }
 
     //load class form Json
     public static Blocks fromJson(String json) {
@@ -58,8 +65,19 @@ public class Blocks {
         return result;
     }
 
+    public boolean checkPrivilege(EndUser endUser){
+        if (endUser.ID.equalsIgnoreCase(this.IDw)) {
+            System.out.println("Vous ne pouvez pas manipuler des données qui ne vous appartiennent pas !!!!");
+            return false;
+        } else {
+            System.out.println("Vous êtes autorisé à manipuler les données.");
+            return true;
+        }
+    }
+
     // Data deletion
-    public void deleteBlock() {
+    public boolean deleteBlock(EndUser endUser, int i) {
+        if (!checkPrivilege(endUser)){return false;}
         // Step 1: Delete the block Di and its security parameters
         // No specific action needed here as it depends on your specific implementation
 
@@ -76,20 +94,23 @@ public class Blocks {
                 }
             }
         }
+        return true;
     }
 
-    public void updateBlock(int i, BigInteger[][] X, String newBlock) {
+    public boolean updateBlock(EndUser endUser, int i, BigInteger[][] X, String newBlock) {
+        if (!checkPrivilege(endUser)){return false;}
         // Step 1: Construct a new vector x'i using the new block D'i
         this.addBlockAtEnd(newBlock);
 
-        BigInteger[][] newX = EndUserSIS.constructMatrixX(this.dataBlocks);
+        BigInteger[][] newX = EndUserSIS.constructMatrixX(endUser, this.dataBlocks.length, this.dataBlocks);
 
         // Extract the first column of newX
         for (int row = 0; row < newX.length; row++) {
             X[row][i] = newX[row][0];
         }
         // Step 2: Compute the vector v'i = A * x'i mod q using computeMatrixV
-        BigInteger[][] newV = EndUserSIS.computeMatrixV(X);
+        BigInteger[][] A = EndUserSIS.computeMatrixA(endUser, paramA);
+        BigInteger[][] newV = EndUserSIS.computeMatrixV(endUser, this.dataBlocks.length, A, X);
 
         // Update the V matrix with the new vector v'i
         for (int row = 0; row < V.length; row++) {
@@ -97,15 +118,19 @@ public class Blocks {
         }
 
         // Step 3: Construct a new matrix V by replacing the vector vi by v'i
+
+        return true;
     }
 
-    public void insertBlock(int i, BigInteger[][] X, String newDataBlock) {
+    public boolean insertBlock(EndUser endUser, int i, BigInteger[][] X, String newDataBlock) {
+        if (!checkPrivilege(endUser)){return false;}
         // Step 1: Construct a new vector x'i using the new block D'i
         this.addBlockAtEnd(newDataBlock);
-        X[i] = EndUserSIS.constructMatrixX(this.dataBlocks)[0];
+        X[i] = EndUserSIS.constructMatrixX(endUser, this.dataBlocks.length, this.dataBlocks)[0];
 
         // Step 2: Compute the vector v'i = A * x'i mod q using computeMatrixV
-        BigInteger[][] newV = EndUserSIS.computeMatrixV(X);
+        BigInteger[][] A = EndUserSIS.computeMatrixA(endUser, paramA);
+        BigInteger[][] newV = EndUserSIS.computeMatrixV(endUser, this.dataBlocks.length, A, X);
 
         // Update the V matrix with the new vector v'i
         for (int row = 0; row < V.length; row++) {
@@ -122,7 +147,7 @@ public class Blocks {
         for (int row = 0; row < V.length; row++) {
             V[row][i] = V[row][i].add(A[row][i].multiply(X[row][0]));
         }
-        N++; // N = V[0].length
+        return true;
     }
 
     public void addBlockAtEnd(String newBlock) {

@@ -28,11 +28,10 @@ public class EndUserSIS {
         BigInteger[][] X = new BigInteger[endUser.m][N];
 
         for (int i = 0; i < endUser.m; i++) {
+            // Calculate the starting index for each injection
+            int bitIndex = i % endUser.lambda;
             for (int j = 0; j < N; j++) {
                 byte[] hash = FunctionsFromServer.hashFunctionH3(dataBlocks[j]); // Hashing each Blocks block
-
-                // Calculate the starting index for each injection
-                int bitIndex = i % endUser.lambda;
 
                 // Fill the matrix X with the hash bit sequences
                 X[i][j] = new BigInteger(1, hash).testBit(bitIndex) ? BigInteger.ONE : BigInteger.ZERO;
