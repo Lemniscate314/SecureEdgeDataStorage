@@ -179,6 +179,8 @@ public class Blocks {
                 }
             }
         }
+
+        this.signature = EndUserIBS.IBS_signature_generation(endUser, this);
         return true;
     }
 
@@ -197,13 +199,12 @@ public class Blocks {
         BigInteger[][] A = EndUserSIS.computeMatrixA(endUser, paramA);
         BigInteger[][] newV = EndUserSIS.computeMatrixV(endUser, this.dataBlocks.length, A, X);
 
-        // Update the V matrix with the new vector v'i
+        // Step 3: Construct a new matrix V by replacing the vector vi by v'i
         for (int row = 0; row < V.length; row++) {
             V[row][i] = newV[row][0];
         }
 
-        // Step 3: Construct a new matrix V by replacing the vector vi by v'i
-
+        this.signature = EndUserIBS.IBS_signature_generation(endUser, this);
         return true;
     }
 
@@ -232,6 +233,8 @@ public class Blocks {
         for (int row = 0; row < V.length; row++) {
             V[row][i] = V[row][i].add(A[row][i].multiply(X[row][0]));
         }
+
+        this.signature = EndUserIBS.IBS_signature_generation(endUser, this);
         return true;
     }
 
