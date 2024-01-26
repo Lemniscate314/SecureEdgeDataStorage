@@ -160,13 +160,13 @@ public class Blocks {
         }
     }
 
-    // Data deletion
     public boolean deleteBlock(EndUser endUser, int i) {
         if (!checkPrivilege(endUser)) {
             return false;
         }
 
         // Step 1: Delete the block Di and its security parameters
+        // Update dataBlocks and dataBlocksMap after identifying the block to delete
         this.dataBlocksMap.remove(dataBlocks[i]);
 
         // Shift dataBlocks to fill the gap left by the removed block
@@ -182,21 +182,25 @@ public class Blocks {
             }
         }
 
-        // Step 2: Delete the vector vi
-        for (int row = 0; row < V[0].length; row++) {
-            V[row][i] = BigInteger.ZERO;
-        }
+        // Step 2: Create a new matrix V with reduced size
+        BigInteger[][] newV = new BigInteger[V.length][V[0].length - 1];
 
-        // Step 3: Decrease by 1 the indexes of data blocks that are larger than i
-        for (int j = i + 1; j < V.length; j++) {
-            if (j - 1 >= 0) {
-                for (int row = 0; row < V[0].length; row++) {
-                    V[row][j - 1] = V[row][j];
+        // Copy the relevant columns from the old V to the new V
+        for (int row = 0; row < V.length; row++) {
+            for (int col = 0, newCol = 0; col < V[0].length; col++) {
+                if (col != i) {
+                    newV[row][newCol] = V[row][col];
+                    newCol++;
                 }
             }
         }
 
+        // Update V to be the newV
+        this.V = newV;
+
+        // Update the signature using the new V
         this.signature = EndUserIBS.IBS_signature_generation(endUser, this);
+
         return true;
     }
 
