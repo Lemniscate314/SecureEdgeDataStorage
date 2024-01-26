@@ -162,9 +162,25 @@ public class Blocks {
 
     // Data deletion
     public boolean deleteBlock(EndUser endUser, int i) {
-        if (!checkPrivilege(endUser)){return false;}
+        if (!checkPrivilege(endUser)) {
+            return false;
+        }
+
         // Step 1: Delete the block Di and its security parameters
-        // No specific action needed here as it depends on your specific implementation
+        this.dataBlocksMap.remove(dataBlocks[i]);
+
+        // Shift dataBlocks to fill the gap left by the removed block
+        for (int j = i; j < dataBlocks.length - 1; j++) {
+            dataBlocks[j] = dataBlocks[j + 1];
+        }
+        dataBlocks[dataBlocks.length - 1] = null;
+
+        // Update the dataBlocksMap for shifted blocks
+        for (int j = i; j < dataBlocks.length - 1; j++) {
+            if (dataBlocks[j] != null) {
+                this.dataBlocksMap.put(dataBlocks[j], j);
+            }
+        }
 
         // Step 2: Delete the vector vi
         for (int row = 0; row < V[0].length; row++) {
@@ -183,6 +199,7 @@ public class Blocks {
         this.signature = EndUserIBS.IBS_signature_generation(endUser, this);
         return true;
     }
+
 
     public boolean updateBlock(EndUser endUser, int i, BigInteger[][] X, String newBlock) {
         if (!checkPrivilege(endUser)){return false;}
@@ -242,8 +259,12 @@ public class Blocks {
         for (int i = 0; i < this.dataBlocks.length; i++) {
             if (this.dataBlocks[i] == null) {
                 this.dataBlocks[i] = newBlock;
+
+                this.dataBlocksMap.put(newBlock, i);
+
                 return;
             }
         }
     }
+
 }

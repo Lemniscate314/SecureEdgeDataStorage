@@ -65,7 +65,6 @@
         <SOURCES />
       </library>
     </orderEntry>
-    <orderEntry type="library" name="google.code.gson" level="application" />
     <orderEntry type="library" name="Maven: org.springframework.boot:spring-boot-starter-web:2.6.2" level="project" />
     <orderEntry type="library" name="Maven: org.springframework.boot:spring-boot-starter:2.6.2" level="project" />
     <orderEntry type="library" name="Maven: org.springframework.boot:spring-boot:2.6.2" level="project" />
@@ -98,6 +97,7 @@
     <orderEntry type="library" name="Maven: org.springframework:spring-aop:5.3.14" level="project" />
     <orderEntry type="library" name="Maven: org.springframework:spring-context:5.3.14" level="project" />
     <orderEntry type="library" name="Maven: org.springframework:spring-expression:5.3.14" level="project" />
+    <orderEntry type="library" name="google.code.gson" level="project" />
   </component>
   <component name="SonarLintModuleSettings">
     <option name="uniqueId" value="83a37e45-df8c-4457-a40d-e9c59ecd8d2c" />
