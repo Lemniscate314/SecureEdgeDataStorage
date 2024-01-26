@@ -35,8 +35,6 @@ public class EndUser {
     protected BigInteger a; // The multiplier
     protected BigInteger C0; // Initial value of C
     protected BigInteger[] paramA; //parameters to regenerate A
-    protected BigInteger In; // Current value of I
-    protected BigInteger Cn; // Current value of C
     protected static String configFilePath = "src/Client/UserParameters.properties";
     protected static String configFilePathParamA = "src/Client/paramA.properties";
     protected boolean loadingSuccessful; //Attribut permettant de determiner si une requete au server est necessaire
@@ -46,8 +44,6 @@ public class EndUser {
         this.loadingSuccessful=load_Public_Parameters_Sw();
         load_ParamA();
         this.paramA = new BigInteger[]{this.I0, this.a, this.C0};
-        this.In = I0; // Initialize In with I0
-        this.Cn = C0; // Initialize Cn with C0
     }
 
     // Fonction qui load les paramètres de la matrice A depuis le fichier configFilePath

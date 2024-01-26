@@ -10,9 +10,14 @@ public class EndUserSIS {
         BigInteger[][] matrixA = new BigInteger[endUser.l][endUser.m];
         BigInteger In = paramA[0];
         BigInteger Cn = paramA[2];
+
+        BigInteger[] response = new BigInteger[3];
         for (int i = 0; i < endUser.l; i++) {
             for (int j = 0; j < endUser.m; j++) {
-                matrixA[i][j] = FunctionsFromServer.generateRandomNumber(In, paramA[1], Cn, endUser.q); // Using the generateRandomNumber method to generate each entry
+                response = FunctionsFromServer.generateRandomNumber(In, paramA[1], Cn, endUser.q); // Using the generateRandomNumber method to generate each entry
+                matrixA[i][j] = response[0];
+                In = response[1];
+                Cn = response[2];
             }
         }
         return matrixA;
