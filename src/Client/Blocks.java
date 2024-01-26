@@ -81,6 +81,7 @@ public class Blocks {
 
         // Diviser la chaîne JSON en sous-chaînes représentant chaque bloc individuel
         String[] blockJsonArray = json.split("\n");
+        System.out.println("JSON récupéré:");
         Blocks.printStringArray(blockJsonArray);
         Block[] blockArray = new Block[blockJsonArray.length];
         HashMap<String, Integer> dataBlocksMap = new HashMap<>();

@@ -43,7 +43,7 @@ public class IBSsignature {
         IBSsignature signature = new IBSsignature();
         try{
         signature.setW1(Zp.newElementFromBytes(Base64.decode(signatureString[0])));
-        signature.setW1(G0.newElementFromBytes(Base64.decode(signatureString[1])));
+        signature.setW2(G0.newElementFromBytes(Base64.decode(signatureString[1])));
         } catch(IOException e) {e.printStackTrace();}
         return signature;
     }

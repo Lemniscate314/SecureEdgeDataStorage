@@ -35,7 +35,7 @@ public class Test {
         Blocks.printStringArray(Blocks.splitStringIntoN(data, decoupage));
 
         Blocks blocks = Blocks.newData(endUser, dataID, topic, data, decoupage);
-
+         /**
         System.out.println("Matrice A:");
         EndUserSIS.printMatrix(EndUserSIS.computeMatrixA(endUser, blocks.paramA));
 
@@ -44,12 +44,14 @@ public class Test {
 
         System.out.println("Matrice V:");
         EndUserSIS.printMatrix(blocks.V);
+        **/
 
         //On ajoute une nouvelle video dans le FOG
         String JSON = blocks.toJson();
 
         //Recuperation d'un JSON pour le parser en Blocks
         Blocks blocksRecieve = Blocks.fromJson(JSON);
+        /**
         System.out.println("Matrice A:");
         EndUserSIS.printMatrix(EndUserSIS.computeMatrixA(endUser, blocksRecieve.paramA));
 
@@ -58,9 +60,23 @@ public class Test {
 
         System.out.println("Matrice V:");
         EndUserSIS.printMatrix(blocksRecieve.V);
+         **/
 
         //Je vérifie l'intégrité
         EndUserIBS.IBS_signature_verification(endUser, blocksRecieve);
+
+        //On modifie maintenant les données pour detecter une erreur d'intégrité
+        Blocks forgedBlocks = blocks;
+        String oldString = forgedBlocks.dataBlocks[0];
+        int position = forgedBlocks.dataBlocksMap.get(oldString);
+        forgedBlocks.dataBlocks[0] = "charge_utile ";
+
+        //On remplace dans le HashMap pour pas générer d'erreurs dans l'execution
+        forgedBlocks.dataBlocksMap.remove(oldString);
+        forgedBlocks.dataBlocksMap.put(forgedBlocks.dataBlocks[0], position);
+
+        JSON = forgedBlocks.toJson();
+        EndUserIBS.IBS_signature_verification(endUser, forgedBlocks);
         };
  /**
     public static void main(String[] args) {

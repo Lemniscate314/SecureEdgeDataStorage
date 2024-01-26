@@ -96,9 +96,10 @@ public class IdentificationServer {
         this.P = G0.newRandomElement();
         this.PK = (this.P).duplicate().mulZn(this.MSK);
         this.random = new SecureRandom();
-        this.l = 2; // Primary security parameter
+        this.l = 64; // Primary security parameter
         this.q = BigInteger.valueOf(l).pow(2).nextProbablePrime(); // The modulus q = next probable prime number of l^2
-        this.m = (int)(l * Math.log(q.doubleValue()) / Math.log(2)) + 1; // Ensuring m > l.log(q)
+        this.m = (int)(2*l * Math.log(q.doubleValue())) + 1; // Ensuring m > l.log(q)
+        while (m % 256 != 0) {m++;} // and m//lambda
         try{
             //On convertit les Elements en string
             prop.setProperty("MSK", Base64.encodeBytes(this.MSK.toBytes()));

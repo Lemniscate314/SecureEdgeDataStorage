@@ -6,6 +6,7 @@ import it.unisa.dia.gas.jpbc.Pairing;
 import it.unisa.dia.gas.plaf.jpbc.pairing.PairingFactory;
 
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 
 public class EndUserIBS {
     static protected Pairing pairing = PairingFactory.getPairing("src/params/curves/a.properties");
@@ -29,21 +30,16 @@ public class EndUserIBS {
         boolean bool = false;
 
         // On construit le vecteur xi
-        BigInteger[][] X = EndUserSIS.computeMatrixX(endUser, blocks.V[0].length, blocks.dataBlocks);
+        BigInteger[][] X = EndUserSIS.computeMatrixX(endUser, blocks.dataBlocks.length, blocks.dataBlocks);
         // On reconstrut la matrice A à partir des paramA reçus
         BigInteger[][] A = EndUserSIS.computeMatrixA(endUser, blocks.paramA);
 
         // On construit la matrice V' que l'on complète avec V
-        BigInteger[][] W = EndUserSIS.computeMatrixV(endUser, blocks.V[0].length, A, X);
-        System.out.println("Matrice W:");
-        EndUserSIS.printMatrix(W);
+        BigInteger[][] W = EndUserSIS.computeMatrixV(endUser, blocks.dataBlocks.length, A, X);
         BigInteger[][] Vprime = blocks.V;
-        System.out.println("Matrice V':");
-        EndUserSIS.printMatrix(Vprime);
         for (int i = 0; i < Vprime.length; i++) {
-            int index = blocks.dataBlocksMap.get(blocks.dataBlocks[i]).intValue();
             for (int j = 0; j < Vprime[0].length; j++) {
-                if (index == j) {
+                if (blocks.dataBlocksMap.get(blocks.dataBlocks[j]).intValue() == j) {
                     Vprime[i][j] = W[i][j];
                 }
             }
@@ -78,5 +74,11 @@ public class EndUserIBS {
         // Copier le troisième tableau après le deuxième
         System.arraycopy(array3, 0, result, length1 + length2, length3);
         return result;
+    }
+    public static void printByteArray(byte[] byteArray) {
+        for (byte b : byteArray) {
+            System.out.print(b + " ");
+        }
+        System.out.println(); // Ajoutez une nouvelle ligne à la fin pour une meilleure lisibilité
     }
 }
