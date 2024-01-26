@@ -78,6 +78,7 @@ public class Test {
         JSON = forgedBlocks.toJson();
         EndUserIBS.IBS_signature_verification(endUser, forgedBlocks);
         };
+
  /**
     public static void main(String[] args) {
         // Example setup
